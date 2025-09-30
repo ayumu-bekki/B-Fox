@@ -1,0 +1,7 @@
+{
+  "C_Cpp.clang_format_fallbackStyle": "{ BasedOnStyle: Google, IndentWidth: 2}",
+  "files.associations": {
+    "algorithm": "cpp"
+  },
+  "cmake.configureOnOpen": false
+}
