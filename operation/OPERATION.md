@@ -1,5 +1,7 @@
 # BleRDF 運用・ルール案
 
+[English documentation is available here](./OPERATION.en.md)
+
 BleRDFは従来のARDF（アマチュア無線方向探知）を、Bluetooth iBeaconを利用し「宝探し遊び」としてアレンジした、手軽に楽しめるアウトドアゲームです。
 
 ## 1. 必要な機材

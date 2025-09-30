@@ -1,5 +1,7 @@
 # BleRDF
 
+[English documentation is available here](./README.en.md)
+
 ## 概要
 Foxハンティング(or ARDF)をBluetooth Low Energy (BLE)でやる試み
 導入・参加の障壁を下げ、「電波の強弱で隠し場所を探す」というARDFのコアな楽しさを実現することを目指しています。
@@ -42,6 +44,8 @@ ARDFにはいくつかの課題があります。
 
 基本遊びだが発展としてARDF競技があるという位置付けを想定し、パークARDFを参考にルールを緩くする方向で運用資料(草案)を作成しました。
 
+[BleRDF 運用・ルール案](./operation/OPERATION.md)
+
 
 ## リポジトリ内容説明
 送信機・受信機のプログラムと機械設計・運用方法が含まれています。
@@ -52,4 +56,5 @@ ARDFにはいくつかの課題があります。
   - 送信機プログラム一式
 - docs
   - 技術資料
-
+- operation
+  - 運用キット
