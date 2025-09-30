@@ -46,9 +46,9 @@ Assuming that it is basically a game, but with ARDF competition as a development
 ## Repository Contents Description
 This repository contains the programs for the transmitter and receiver, mechanical design, and operational methods.
 
-- brdf_receiver
+- blerdf_receiver
   - A set of receiver programs
-- brdf_beacon
+- blerdf_beacon
   - A set of transmitter programs
 - docs
   - Technical documents

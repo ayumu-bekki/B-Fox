@@ -46,9 +46,9 @@ ARDFにはいくつかの課題があります。
 ## リポジトリ内容説明
 送信機・受信機のプログラムと機械設計・運用方法が含まれています。
 
-- brdf_receiver
+- blerdf_receiver
   - 受信機プログラム一式
-- brdf_beacon
+- blerdf_beacon
   - 送信機プログラム一式
 - docs
   - 技術資料

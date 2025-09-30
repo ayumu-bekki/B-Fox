@@ -1,0 +1,14 @@
+#ifndef BleRDF_RECEIVER_MAIN_VERSION_H_
+#define BleRDF_RECEIVER_MAIN_VERSION_H_
+// ESP32 BleRDF Receiver
+// (C)2025 bekki.jp
+
+#include <string>
+
+namespace blerdf_receiver_system {
+
+constexpr std::string_view kGitVersion = "@GIT_VERSION@";
+
+}  // namespace blerdf_receiver_system
+
+#endif  // BleRDF_RECEIVER_MAIN_VERSION_H_

@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=700, maximum-scale=1.0, user-scalable=yes">
+  <title>BleRDF Beacon Control Panel</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="text/javascript" src="bluejelly.js"></script>
+  <script>
+    let ble = new BlueJelly();
+    ble.setUUID("BleRDFBeaconSetting", "347fd67c-9131-4ea0-b0a7-1886d8c0f0df", "096a09d5-1b35-4c99-a483-8d0c34f70220");
+    ble.setUUID("BleRDFBeaconBatteryVoltageChar", "347fd67c-9131-4ea0-b0a7-1886d8c0f0df", "53bf4a46-41ba-46a3-b675-4fb7f0770905");
+
+    ble.onConnectGATT = function(uuid) {
+      console.log('> connected GATT');
+      if (uuid == "BleRDFBeaconSetting") {
+        document.getElementById('status').innerHTML = "Connected";
+        document.getElementById('connect').disabled = null;
+        document.getElementById('control_panel').style.display = "block";
+      }
+    };
+
+    ble.onWrite = function(uuid) {
+      alert("Settings saved.\nPlease reconnect after reboot.");
+      location.reload();
+    };
+
+    var logDataViewAsHex = function(dataView)  {
+      const bytes = [];
+      for (let i = 0; i < dataView.byteLength; i++) {
+        const byte = dataView.getUint8(i);
+        bytes.push(byte.toString(16).padStart(2, '0'));
+      }
+      console.log(bytes.join(' '));
+    }
+
+    ble.onRead = function(data, uuid) {
+      if (uuid == "BleRDFBeaconSetting") {
+        console.log('> Recv Setting');
+        logDataViewAsHex(data);
+        const decoder = new TextDecoder('utf-8');
+        var device_name_length = data.getUint8(0);
+        const data_name_uint8= new Uint8Array(data.buffer, data.byteOffset + 1, device_name_length);
+        document.getElementById('device_name').value = decoder.decode(data_name_uint8);
+        document.getElementById('major').value = data.getUint16(1 + device_name_length, true);
+        document.getElementById('minor').value = data.getUint16(1 + device_name_length + 2, true);
+        document.getElementById('measured_power').value = data.getInt16(1 + device_name_length + 4, true);
+        document.getElementById('tx_power').value = data.getInt16(1 + device_name_length + 6, true);
+
+        ble.read('BleRDFBeaconBatteryVoltageChar');
+      }
+      else if (uuid == "BleRDFBeaconBatteryVoltageChar") {
+        console.log('> Recv Battery Voltage');
+        logDataViewAsHex(data);
+        var value = data.getInt16(0, true) * 0.01;
+        document.getElementById('battery_voltage').innerHTML = value.toFixed(2).padStart(4, ' ') + "V";
+      }
+    };
+
+    ble.onDisconnect = function() {
+      document.getElementById('status').innerHTML = "Disconnected";
+
+      document.getElementById('connect_panel').style.display = "block";
+      document.getElementById('control_panel').style.display = "none";
+    };
+    
+    ble.onError = function(error){
+      document.getElementById('status').innerHTML = "Error (" + error + ")";
+      document.getElementById('connect_panel').style.display = "block";
+      document.getElementById('control_panel').style.display = "none";
+    };
+
+    window.onload = function() {
+      document.getElementById('connect').addEventListener('click', function() {
+        document.getElementById('status').innerHTML = "Connecting...";
+        document.getElementById('connect').disabled = "disable";
+        document.getElementById('connect_panel').style.display = "none";
+        //return (ble.scan('BleRDFBeaconSetting')).then( () => {
+        //  ble.connectGATT('BleRDFBeaconSetting');
+        //}); */
+        ble.read('BleRDFBeaconSetting');
+      });
+
+      document.getElementById('update_setting').addEventListener('click', function() {
+        var device_name = document.getElementById('device_name').value;
+        var device_name_length = device_name.length;;
+
+        var buffer = new ArrayBuffer(device_name_length + 9);
+        var view = new DataView(buffer);
+
+        view.setUint8(0, device_name_length);
+        const encoder = new TextEncoder('utf-8');
+        const encodedBytes = encoder.encode(device_name);
+        for (let i = 0; i < encodedBytes.length; i++) {
+          view.setUint8(1 + i, encodedBytes[i]);
+        }
+        view.setUint16(1 + device_name_length, document.getElementById('major').value, true);
+        view.setUint16(1 + device_name_length + 2, document.getElementById('minor').value, true);
+        view.setInt16(1 + device_name_length + 4, document.getElementById('measured_power').value, true);
+        view.setInt16(1 + device_name_length + 6, document.getElementById('tx_power').value, true);
+
+        ble.write('BleRDFBeaconSetting', new Uint8Array(buffer));
+      });
+    };
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="title margin">
+      <h1 class="title">BleRDF Beacon Control Panel</h1>
+    </div>
+    <div class="contents margin">
+      <p>Status : <span id="status">Not connected</span></p>
+
+      <div id="connect_panel">
+        <p>Default device name is BleRDF Beacon.</p>
+        <p><button id="connect" class="button">Connect</button></p>
+      </div>
+
+      <hr>
+
+      <div id="control_panel" style="display: none;">
+        <h2 class="sub_title">Battery Voltage</h2>
+        <p id="battery_voltage">0.0V</p>
+
+        <hr>
+        
+        <h2 class="sub_title">BLE Beacon Settings</h2>
+
+        <form onsubmit="return false;">
+          <div class="form-group">
+            <label for="device_name">Device Name</label>
+            <input type="text" id="device_name" name="device_name" minlength="3" maxlength="26" placeholder="Enter Bluetooth device name" required>
+            <div class="rules">📝 3-26 characters</div>
+            <div class="error">⚠️  Please enter 3-26 characters</div>
+          </div>
+
+          <div class="form-group">
+            <label for="major">Major</label>
+            <input type="number" id="major" name="major" min="0" max="9" required>
+            <div class="rules">📝 Number from 0 to 9</div>
+            <div class="error">⚠️  Please enter a number from 0 to 9</div>
+          </div>
+
+          <div class="form-group">
+            <label for="minor">Minor</label>
+            <input type="number" id="minor" name="minor" min="0" max="9" required>
+            <div class="rules">📝 Number from 0 to 9</div>
+            <div class="error">⚠️  Please enter a number from 0 to 9</div>
+          </div>
+
+          <div class="form-group">
+            <label for="measured_power">Measured Power</label>
+            <input type="number" id="measured_power" name="measured_power" min="-100" max="-40" required>
+            <div class="rules">📝 Number from -40 to -100</div>
+            <div class="error">⚠️  Please enter a number from -40 to -100</div>
+          </div>
+
+          <div class="form-group">
+            <label for="tx_power">TX Power</label>
+            <select id="tx_power" name="tx_power" required>
+              <option value="" disabled>Please select</option>
+              <option value="1">High   +9dbm (8mW)</option>
+              <option value="2">Mid    +6dbm (4mW) </option>
+              <option value="3">Low    +3dbm (2mW)</option>
+              <option value="4">S_Low -12dBm (0.06mW)</option>
+            </select>
+          </div>
+
+          <button id="update_setting" class="button">Apply Settings (Reboot)</button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>
