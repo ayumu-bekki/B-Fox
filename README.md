@@ -1,54 +1,55 @@
 # BleRDF
 
-## Overview
-This is an attempt to do Fox Hunting (or ARDF) with Bluetooth Low Energy (BLE).
-The goal is to lower the barrier to entry and participation, and to realize the core fun of ARDF, which is "searching for a hidden location by the strength of radio waves."
+## 概要
+Foxハンティング(or ARDF)をBluetooth Low Energy (BLE)でやる試み
+導入・参加の障壁を下げ、「電波の強弱で隠し場所を探す」というARDFのコアな楽しさを実現することを目指しています。
 
-ARDF has several challenges:
-- A license is required to set up a beacon.
-- Commercial use is not possible because it uses amateur radio bands.
-- The cost of transmitters and receivers is high.
-- It is not easy to get started and feels like a high hurdle.
+ARDFにはいくつかの課題があります。
+- ビーコン設置に免許が必要
+- アマチュア無線の帯域を利用するため、商用利用が不可
+- 送信機・受信機のコストが高い
+- 手軽でなくハードルの高さを感じる
 
-Therefore, we are trying to realize similar fun using the general-purpose BLE in the ISM band.
+そこで、ISMバンドかつ一般的なBLEを利用して同様の遊びを実現しようとしています。
 
-### Comparison
+### 比較
  
 | | ARDF | BleRDF |
 | ---- | ---- | ---- |
-| Cost of transmitter/receiver | Tens of thousands of yen | Several thousand yen |
-| Frequency used | 3.5MHz / 144MHz | 2.4GHz |
-| Antenna power | 3.5MHz(3-5W) / 144MHz(0.25-1.5W) | 0.06-8mW |
-| Range | Several kilometers | Several hundred meters |
-| Receiver | Dedicated or compatible receiver required | Smartphone is also possible |
-| Detection method on receiver | Sound | Numerical value |
-| Receiver antenna modification | Possible | Not possible |
-| Competition scale | Competition (world championships) | Play/Game |
+| 送信受信機の費用 | 数万円 | 数千円 |
+| 利用する周波数 | 3.5MHz / 144MHz | 2.4GHz |
+| 空中線出力 | 3.5MHz(3-5W) / 144MHz(0.25-1.5W)程度 | 0.06-8mW |
+| 活動範囲 | 数キロメートル | 数百メートル |
+| 受信機 | 専用もしくは該当形式の受信機が必要 | スマートフォンでも可能 |
+| 受信機での探知方法 | 音 | 数値 |
+| 受信アンテナの改造 | 可能 | 不可 |
+| 競技規模 | 競技(世界大会あり) | 遊び |
 
-## Transmitter/Receiver
+## 送信機・受信機
 
-The microcontroller used is the Seeed Studio XIAO ESP32C6. It has the following features:
-- BLE support
-- External antenna can be used (with technical standards conformity certification)
-- Small footprint
-- Lipo battery support
+マイコンは Seeed Studio XIAO ESP32C6 を利用。以下の特徴がある。
+- BLE対応
+- 外部アンテナ利用可能 (技適あり)
+- フットプリントが小さい
+- リポバッテリー対応
 
-esp-idf is required to build the program.
+プログラムのビルドにはesp-idfが必要です。
 
-The protocol used is iBeacon (BLE).
-Therefore, even without a dedicated receiver, you can play by installing an app like LightBlue (https://punchthrough.com/lightblue/) on your smartphone.
+プロトコルにはiBeacon (BLE)を利用しています。
+よって、専用受信機が無くてもスマートフォンで LightBlue (https://punchthrough.com/lightblue/) などをインストールすれば遊べるようにしています。
 
-## About Operation
+## 運用について
 
-Assuming that it is basically a game, but with ARDF competition as a development, we have created operational materials (draft) with relaxed rules based on Park ARDF.
+基本遊びだが発展としてARDF競技があるという位置付けを想定し、パークARDFを参考にルールを緩くする方向で運用資料(草案)を作成しました。
 
 
-## Repository Contents Description
-This repository contains the programs for the transmitter and receiver, mechanical design, and operational methods.
+## リポジトリ内容説明
+送信機・受信機のプログラムと機械設計・運用方法が含まれています。
 
 - blerdf_receiver
-  - A set of receiver programs
+  - 受信機プログラム一式
 - blerdf_beacon
-  - A set of transmitter programs
+  - 送信機プログラム一式
 - docs
-  - Technical documents
+  - 技術資料
+

@@ -1,90 +1,87 @@
-# BleRDF Operation & Rules Draft
+# BleRDF 運用・ルール案
 
-BleRDF is an easy-to-enjoy outdoor game, an adaptation of traditional ARDF (Amateur Radio Direction Finding), using Bluetooth iBeacons for a "treasure hunt" style experience.
+BleRDFは従来のARDF（アマチュア無線方向探知）を、Bluetooth iBeaconを利用し「宝探し遊び」としてアレンジした、手軽に楽しめるアウトドアゲームです。
 
-## 1. Required Equipment
+## 1. 必要な機材
 
-| Role | Equipment | Notes |
+| 役割 | 機材 | 備考 |
 | ---- | ---- | ---- |
-| Player | 1. Receiver | Use a dedicated receiver or a smartphone with a BLE scanning app. |
-| | 2. Record Card | For recording proof of discovery (stamps or stickers). Not required if using QR codes for recording. |
-| Organizer | 1. Beacons | At least 3-5. Ensure they are powered on. |
-| | 2. Recording Tools | Stamps/stickers, or QR code placements for recording. |
-| | 3. Area Map | A simple map showing the search area. Mark the start position and boundaries. |
+| プレイヤー | 1. 受信機 | 専用受信機もしくはBLE探索アプリを入れたスマートフォンを使います。 |                      
+| | 2. 記録カード | 発見した証（スタンプやシール）を記録するためのもの。QRコードで記録する場合は不要 |                
+| 主催者 | 1\. ビーコン | 少なくとも3〜5個程度。電源が入っていること。 |                                               
+| | 2. 記録用の道具 | スタンプ/シール、または記録用のQRコード設置物。 |                                               
+| | 3. エリアマップ | 捜索範囲がわかる簡単な地図。スタート位置と範囲を記載しておく |  
 
-## 2. Preparation and Setup (for Organizers)
+## 2. 準備と設置（主催者向け）
 
-### A. Area Selection and Rule Setting
+### A. エリア選定とルール設定
 
-1. **Select a Safe Area**
-   - Choose a safe area for movement, such as a park, a private forest, or a large open field.
-   - Avoid dangerous places (cliffs, unauthorized private property, bodies of water, areas near heavy traffic).
-2. **Define the Search Area**
-   - Draw clear boundaries on the area map and communicate them to the players.
-3. **Determine the Winning Conditions**
-   - If necessary, set a target number of discoveries, such as "find all beacons" or "find 3 or more beacons."
+1. 安全なエリアの選定
+  - 公園、敷地内の森、広場など、安全に移動できる範囲を設定します。
+  -  危険な場所（崖、許可をとっていない私有地、水場、交通量の多い道路付近）は避けます。  
+2. 捜索範囲の指定
+  - エリアマップに明確な境界線を引き、プレイヤーに伝達します。  
+3. クリア条件の決定
+  -  必要に応じて「全てのビーコンを見つける」「3つ以上のビーコンを見つける」など、目標となる発見数を定めます。
 
-### B. Beacon and Recording Point Placement
+### B. ビーコンと記録ポイントの設置
 
-- **Simple Hiding Spots**
-  - Place the beacons where players can easily reach them by hand.
-- **Set up Recording Points**
-  - Near each beacon, place a stamp, sticker, or a QR code for digital recording.
-  - Clearly mark each recording point with a **unique identifier** (e.g., an alphabet letter or an animal picture) that corresponds to the discovered beacon.
-- **Test Placed Beacons**
-  - Test the signal strength (RSSI) of the beacons at the venue beforehand to determine the approximate distance at which a player is considered "close."
-  - For battery-powered beacons, check if the voltage is adequate and if they can broadcast a stable signal for the duration of the event.
+- 簡単な隠し場所
+  - ビーコン本体は、プレイヤーが簡単に手で触れられる範囲に設置します。  
+- 記録ポイントの設置
+  - ビーコンのすぐ近くに、記録カードに押すスタンプ、シール、またはデジタル記録用のQRコードを設置します。  
+  - 記録ポイントには、発見したビーコンと一致する**ユニークなマーク**（例：アルファベットや動物の絵）を明記しておきます。  
+- 設置したビーコンのテスト実施
+  - 事前に会場でビーコンの信号強度（RSSI）をテストし、おおよそどの程度の距離で「近づいた」と判断できるかを確認します。  
+  - バッテリー駆動の場合は、電圧が適切か、競技時間中も安定して信号を発信できるかを確認します。
 
-## 3. How to Play
+## 3. 遊び方
 
-### 1. Start
+### 1. スタート
 
-- Receive a record card from the organizer if needed.
-- Start your receiver or launch a BLE scanner app like LightBlue on your smartphone and begin scanning.
+- 主催者から必要に応じて記録カードを受け取ります。
+- 受信機、もしくはスマートフォンで LightBlue を起動し、計測を開始します。
 
-### 2. Direction Finding
+### 2. 方向探知
 
-- **Using Signal Strength (RSSI)**
-  - Target the strongest signal (the one with the smallest absolute number).
-- **Estimating Direction**
-  - Proceed in the direction where the signal gets stronger (the RSSI value decreases).
-  - BLE uses a 2.4GHz radio frequency, and signals can be reflected or blocked by buildings and terrain. It's important to carefully observe signal changes to estimate the direction.
-- **Shielding Technique**
-  - BLE signals are weak and easily blocked by the body or obstacles. A useful technique is to place your body between the receiver and the suspected beacon location. If the signal weakens, the beacon is likely in the opposite direction.
+- 信号強度（RSSI）の利用
+  - 最も強い信号（最も数字の絶対値が小さいもの）をターゲットにします。
+- 方向の推測
+  - 信号が強くなる方向（RSSI値が小さくなる方向）を推測しながら進みます。
+  - BLEは2.4GHzの電波であり、建物や地形によって信号が反射したり、遮られたりします。
+信号の変化をよく観察しながら、慎重に方向を推測することが重要です。
+- シールド技術
+  - BLEは電波が弱く、身体や障害物で容易に遮蔽されます。受信機とビーコンの間に自分の身体を入れることで信号を遮り、信号が弱くなる方向の逆がビーコンのおおよその方向だと判断するテクニックが有効です
 
-### 3. Discovery and Recording
+### 3. 発見と記録
 
-- **Physical Search**
-  - When the signal strength reaches a certain threshold (e.g., below -50dBm), start a physical search of the immediate surroundings.
-  - This threshold is just a guideline. It can vary depending on the receiver and the environment, so prioritize the results of on-site testing.
-- **Record Your Find**
-  - Once you find the hidden beacon, use the provided stamp, sticker, or QR code to record your discovery.
+- 信号強度が一定の基準（-50dBm以下）になったら、物理的に周囲を捜索します。 
+  - この基準値はあくまで目安です。受信機や周辺環境によって変動するため、現場のテスト結果を優先してください。
+- 隠されているビーコンを見つけたら、その場にあるスタンプ、またはシール・QRコードを使って証拠を残します
 
-### 4. Goal
+### 4. ゴール
 
-- **Finish**
-  - Once you meet the set winning conditions (e.g., collecting records for 3 beacons), return to the starting point promptly to finish.
-- **Verification**
-  - Have your record card checked by the organizer.
+- 設定されたクリア条件（例：3つのビーコンの記録を全て集める）を達成したら、速やかにスタート地点に戻りゴールします
+- 主催者による記録カードのチェックを受けます。
 
-## 4. Rule Setting and Enjoyment
+## 4. ルール設定と楽しみ方
 
-### For a Pure Treasure Hunt
+### 純粋な宝探しとして楽しむ場合
 
-- The goal is to find all the beacons within the time limit.
-- Enjoy the act of finding itself without ranking. Finding even one beacon is a success, making it enjoyable for beginners.
+- 時間内に全てのビーコンを見つけることを目標とします
+- 順位をつけず、純粋に「見つけられたこと」を楽しみます。1つでも見つけることができればOKとし、初心者でも楽しめるようにします
 
-### For a Competition
+### 競技として楽しむ場合
 
-- The winner is the player who finds the set number of beacons in the shortest time with no recording errors.
-- Players may be disqualified for recording incorrect proof or for dangerous behavior.
+- 設定された数のビーコンを最も短時間で発見し、かつ記録に不備がないプレイヤーを勝者とします
+- 誤った証拠を記録していた場合、または危険行為があった場合は失格とします。
 
-## 5. Safety Precautions
+## 5. 安全に関する注意事項
 
-- **Principle of Self-Responsibility**
-  - Participants are responsible for their own injuries or accidents during the event. Please ensure you have insurance and are in good health.
-- **Consideration for Others**
-  - In areas with the general public, do not run and be careful not to obstruct other people or vehicles.
-  - Be mindful not to damage natural features like bushes and trees.
-- **Emergency Contact Information**
-  - Have a system in place for immediate contact in case of an emergency.
+- 自己責任の原則
+  - 競技中の怪我や事故は、参加者自身の責任となります。保険加入や体調管理を徹底してください
+- 周辺への配慮
+  - 一般の利用者がいる場所では、走らず、他の利用者や車両の通行を妨げないように注意して移動してください
+  - 植え込みや樹木など、自然物を傷つけないように配慮してください
+- 緊急連絡先の周知
+  - 緊急時にすぐに連絡できる体制を整えてください
