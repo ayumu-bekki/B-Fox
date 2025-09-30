@@ -1,22 +1,21 @@
-#ifndef VOLTAGE_CHECKER_TASK_H_
-#define VOLTAGE_CHECKER_TASK_H_
+#ifndef BRDF_BEACON_MAIN_VOLTAGE_CHECK_TASK_H_
+#define BRDF_BEACON_MAIN_VOLTAGE_CHECK_TASK_H_
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include <soc/soc.h>
 
 #include <memory>
 
 #include "task.h"
 
-namespace BrdfBeaconSystem {
+namespace brdf_beacon_system {
 
 class VoltageCheckTask final : public Task {
  public:
-  static constexpr char *const TASK_NAME = (char *)"VoltageCheckTask";
-  static constexpr int PRIORITY = Task::PRIORITY_LOW;
-  static constexpr int CORE_ID = tskNO_AFFINITY;
+  static constexpr const char kTaskName[] = "VoltageCheckTask";
+  static constexpr int kPriority = Task::kPriorityLow;
+  static constexpr int kCoreId = tskNO_AFFINITY;
 
  public:
   VoltageCheckTask();
@@ -33,6 +32,6 @@ class VoltageCheckTask final : public Task {
 
 using VoltageCheckTaskUniquePtr = std::unique_ptr<VoltageCheckTask>;
 
-}  // namespace BrdfBeaconSystem
+}  // namespace brdf_beacon_system
 
-#endif  // VOLTAGE_CHECKER_TASK_H_
+#endif  // BRDF_BEACON_MAIN_VOLTAGE_CHECK_TASK_H_

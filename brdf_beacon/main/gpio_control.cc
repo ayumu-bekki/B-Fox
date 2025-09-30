@@ -1,7 +1,6 @@
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include "gpio_control.h"
 
 #include <driver/gpio.h>
@@ -11,7 +10,8 @@
 
 #include "logger.h"
 
-namespace BrdfBeaconSystem::GPIO {
+namespace brdf_beacon_system {
+namespace gpio {
 
 /// Init GPIO ISR Service
 void InitGpioIsrService() { gpio_install_isr_service(0); }
@@ -52,7 +52,7 @@ void SetLevel(const gpio_num_t gpio_number, const bool level) {
   gpio_set_level(gpio_number, level);
 }
 
-/// Gett GPIO Level (Input)
+/// Get GPIO Level (Input)
 bool GetLevel(const gpio_num_t gpio_number) {
   return gpio_get_level(gpio_number) != 0;
 }
@@ -89,13 +89,13 @@ uint32_t GetAdcVoltage(const int32_t adc_channel_no, const int32_t round) {
 
   uint32_t sum_voltage = 0;
   for (int32_t i = 0; i < round; ++i) {
-    int32_t adcValue = 0;
+    int32_t adc_value = 0;
     adc_oneshot_read(adc_handle, static_cast<adc_channel_t>(adc_channel_no),
-                     reinterpret_cast<int*>(&adcValue));
-    int32_t adcVoltage = 0;
-    adc_cali_raw_to_voltage(adc_cali_handle, adcValue,
-                            reinterpret_cast<int*>(&adcVoltage));
-    sum_voltage += adcVoltage;
+                     reinterpret_cast<int*>(&adc_value));
+    int32_t adc_voltage = 0;
+    adc_cali_raw_to_voltage(adc_cali_handle, adc_value,
+                            reinterpret_cast<int*>(&adc_voltage));
+    sum_voltage += adc_voltage;
   }
 
   // Shutdown
@@ -105,4 +105,5 @@ uint32_t GetAdcVoltage(const int32_t adc_channel_no, const int32_t round) {
   return sum_voltage / round;
 }
 
-}  // namespace BrdfBeaconSystem::GPIO
+}  // namespace gpio
+}  // namespace brdf_beacon_system

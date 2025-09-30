@@ -85,6 +85,7 @@ uint32_t GetAdcVoltage(const int32_t adc_channel_no, const int32_t round) {
   esp_err_t ret =
       adc_cali_create_scheme_curve_fitting(&cali_config, &adc_cali_handle);
   if (ret != ESP_OK) {
+    adc_oneshot_del_unit(adc_handle);
     return 0;
   }
 

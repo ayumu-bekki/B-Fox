@@ -1,24 +1,24 @@
-#ifndef xiao_esp32c6_pin_H_
-#define xiao_esp32c6_pin_H_
+#ifndef BRDF_BEACON_MAIN_XIAO_ESP32C6_PIN_H_
+#define BRDF_BEACON_MAIN_XIAO_ESP32C6_PIN_H_
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
 #include <driver/gpio.h>
 
-namespace BrdfBeaconSystem {
-namespace XIAO_ESP32_PIN {
+namespace brdf_beacon_system {
+namespace xiao_esp32_pin {
 
-static constexpr gpio_num_t SDA = static_cast<gpio_num_t>(22);
-static constexpr gpio_num_t SCL = static_cast<gpio_num_t>(23);
+static constexpr gpio_num_t kSda = static_cast<gpio_num_t>(22);
+static constexpr gpio_num_t kScl = static_cast<gpio_num_t>(23);
 
-static constexpr gpio_num_t A0 = static_cast<gpio_num_t>(0);
-static constexpr gpio_num_t D9 = static_cast<gpio_num_t>(20);
+static constexpr gpio_num_t kA0 = static_cast<gpio_num_t>(0);
+static constexpr gpio_num_t kD9 = static_cast<gpio_num_t>(20);
 
-static constexpr gpio_num_t WIFI_ENABLE =
+static constexpr gpio_num_t kWifiEnable =
     static_cast<gpio_num_t>(3);  // RF (Wi-Fi & BLE)
-static constexpr gpio_num_t WIFI_ANT_CONFIG = static_cast<gpio_num_t>(14);
+static constexpr gpio_num_t kWifiAntConfig = static_cast<gpio_num_t>(14);
 
-}  // namespace XIAO_ESP32_PIN
-}  // namespace BrdfBeaconSystem
+}  // namespace xiao_esp32_pin
+}  // namespace brdf_beacon_system
 
-#endif  // xiao_esp32c6_pin_H_
+#endif  // BRDF_BEACON_MAIN_XIAO_ESP32C6_PIN_H_

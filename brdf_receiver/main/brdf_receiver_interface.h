@@ -1,13 +1,10 @@
-#ifndef brdf_receiver_INTERFACE_H_
-#define brdf_receiver_INTERFACE_H_
+#ifndef BRDF_RECEIVER_MAIN_BRDF_RECEIVER_INTERFACE_H_
+#define BRDF_RECEIVER_MAIN_BRDF_RECEIVER_INTERFACE_H_
 // ESP32 BRDF Receiver
 // (C)2025 bekki.jp
 
 // Include ----------------------
-#include <chrono>
 #include <memory>
-
-#include "st7032.h"
 
 namespace brdf_receiver_system {
 
@@ -25,4 +22,4 @@ using BrdfReceiverInterfaceConstWeakPtr =
 
 }  // namespace brdf_receiver_system
 
-#endif  // brdf_receiver_INTERFACE_H_
+#endif  // BRDF_RECEIVER_MAIN_BRDF_RECEIVER_INTERFACE_H_

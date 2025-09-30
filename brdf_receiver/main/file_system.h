@@ -1,5 +1,5 @@
-#ifndef FILE_SYSTEM_H_
-#define FILE_SYSTEM_H_
+#ifndef BRDF_RECEIVER_MAIN_FILE_SYSTEM_H_
+#define BRDF_RECEIVER_MAIN_FILE_SYSTEM_H_
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 // FileSystem
@@ -28,5 +28,5 @@ bool Delete(const std::string& file_path);
 }  // namespace file_system
 }  // namespace brdf_receiver_system
 
-#endif  // FILE_SYSTEM_H_
+#endif  // BRDF_RECEIVER_MAIN_FILE_SYSTEM_H_
 // EOF

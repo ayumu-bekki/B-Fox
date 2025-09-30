@@ -1,54 +1,53 @@
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include "task.h"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-namespace BrdfBeaconSystem {
+namespace brdf_beacon_system {
 
 Task::Task() = default;
 
-Task::Task(const std::string& taskName, const int32_t priority,
-           const int coreId)
-    : m_Status(TASK_STATUS_READY),
-      m_TaskName(taskName),
-      m_Priority(priority),
-      m_CoreId(coreId) {}
+Task::Task(const std::string& task_name, const int32_t priority,
+           const int core_id)
+    : status_(kReady),
+      task_name_(task_name),
+      priority_(priority),
+      core_id_(core_id) {}
 
 Task::~Task() { Stop(); }
 
 void Task::Start() {
-  if (m_Status != TASK_STATUS_READY) {
+  if (status_ != kReady) {
     return;
   }
-  m_Status = TASK_STATUS_RUN;
-  xTaskCreatePinnedToCore(this->Listener, m_TaskName.c_str(), TASK_STAC_DEPTH,
-                          this, m_Priority, nullptr, m_CoreId);
+  status_ = kRun;
+  xTaskCreatePinnedToCore(this->Listener, task_name_.c_str(), kTaskStackDepth,
+                          this, priority_, nullptr, core_id_);
 }
 
 void Task::Stop() {
-  if (m_Status != TASK_STATUS_RUN) {
+  if (status_ != kRun) {
     return;
   }
-  m_Status = TASK_STATUS_END;
+  status_ = kEnd;
 }
 
 void Task::Run() {
   Initialize();
-  while (m_Status == TASK_STATUS_RUN) {
+  while (status_ == kRun) {
     Update();
   }
   Stop();
 }
 
-void Task::Listener(void* const pParam) {
-  if (pParam) {
-    static_cast<Task*>(pParam)->Run();
+void Task::Listener(void* const param) {
+  if (param) {
+    static_cast<Task*>(param)->Run();
   }
   vTaskDelete(nullptr);
 }
 
-}  // namespace BrdfBeaconSystem
+}  // namespace brdf_beacon_system

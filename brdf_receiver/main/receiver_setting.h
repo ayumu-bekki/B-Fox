@@ -1,15 +1,15 @@
-#ifndef RECEIVER_SETTING_H_
-#define RECEIVER_SETTING_H_
+#ifndef BRDF_RECEIVER_MAIN_RECEIVER_SETTING_H_
+#define BRDF_RECEIVER_MAIN_RECEIVER_SETTING_H_
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
 // Include ----------------------
+#include <cJSON.h>
+#include <esp_bt.h>
+
 #include <cstdint>
 #include <memory>
 #include <string>
-
-#include <cJSON.h>
-#include <esp_bt.h>
 
 namespace brdf_receiver_system {
 
@@ -42,5 +42,5 @@ using ReceiverSettingConstWeakPtr = std::weak_ptr<const ReceiverSetting>;
 
 }  // namespace brdf_receiver_system
 
-#endif  // RECEIVER_SETTING_H_
+#endif  // BRDF_RECEIVER_MAIN_RECEIVER_SETTING_H_
 // EOF

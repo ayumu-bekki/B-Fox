@@ -1,5 +1,5 @@
-#ifndef TASK_H_
-#define TASK_H_
+#ifndef BRDF_RECEIVER_MAIN_TASK_H_
+#define BRDF_RECEIVER_MAIN_TASK_H_
 // ESP32 BRDF Receiver
 // (C)2025 bekki.jp
 
@@ -14,7 +14,7 @@ namespace brdf_receiver_system {
 /// FreeRTOS xTask Wrap
 class Task {
  public:
-  enum TaskStatus {
+  enum class TaskStatus {
     kReady,
     kRun,
     kEnd,
@@ -56,18 +56,18 @@ class Task {
 
  protected:
   /// Task Status
-  TaskStatus m_Status;
+  TaskStatus status_;
 
   /// Task Name
-  std::string m_TaskName;
+  std::string task_name_;
 
   /// Task Priority
-  int32_t m_Priority;
+  int32_t priority_;
 
   /// Use Core Id
-  int32_t m_CoreId;
+  int32_t core_id_;
 };
 
 }  // namespace brdf_receiver_system
 
-#endif  // TASK_H_
+#endif  // BRDF_RECEIVER_MAIN_TASK_H_

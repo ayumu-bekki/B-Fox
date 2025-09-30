@@ -1,5 +1,5 @@
-#ifndef ibeacon_H_
-#define ibeacon_H_
+#ifndef BRDF_RECEIVER_MAIN_IBEACON_H_
+#define BRDF_RECEIVER_MAIN_IBEACON_H_
 // ESP32 BRDF Receiver
 // (C)2025 bekki.jp
 
@@ -35,29 +35,29 @@ struct __attribute__((packed)) BleIBeacon {
 };
 
 // iBeacon header
-static const BleIBeaconHead IBEACON_HEADER = {.flags = {0x02, 0x01, 0x06},
+static const BleIBeaconHead kIBeaconHeader = {.flags = {0x02, 0x01, 0x06},
                                               .length = 0x1A,
                                               .type = 0xFF,
                                               .company_id = 0x004C,
                                               .beacon_type = 0x1502};
 
-uint16_t endian_change_u16(const uint16_t data) {
+inline uint16_t EndianChangeU16(const uint16_t data) {
   return ((data & 0xff00) >> 8) + ((data & 0xff) << 8);
 }
 
-BleIBeacon CreateiBeaconAttr(const uint8_t *const proximity_uuid,
-                             const uint16_t major, const uint16_t minor,
-                             const int8_t measured_power) {
+inline BleIBeacon CreateIBeaconAttr(const uint8_t* proximity_uuid,
+                                    const uint16_t major, const uint16_t minor,
+                                    const int8_t measured_power) {
   BleIBeacon ble_ibeacon = {};
 
   // Set header
-  std::memcpy(&ble_ibeacon.ibeacon_head, &IBEACON_HEADER,
-              sizeof(IBEACON_HEADER));
+  std::memcpy(&ble_ibeacon.ibeacon_head, &kIBeaconHeader,
+              sizeof(kIBeaconHeader));
 
   // Specify vendor
   std::memcpy(&ble_ibeacon.ibeacon_vendor.proximity_uuid, proximity_uuid, 16);
-  ble_ibeacon.ibeacon_vendor.major = endian_change_u16(major);  // BigEndian
-  ble_ibeacon.ibeacon_vendor.minor = endian_change_u16(minor);  // BigEndian
+  ble_ibeacon.ibeacon_vendor.major = EndianChangeU16(major);  // BigEndian
+  ble_ibeacon.ibeacon_vendor.minor = EndianChangeU16(minor);  // BigEndian
   ble_ibeacon.ibeacon_vendor.measured_power = measured_power;
 
   return ble_ibeacon;
@@ -65,4 +65,4 @@ BleIBeacon CreateiBeaconAttr(const uint8_t *const proximity_uuid,
 
 }  // namespace brdf_receiver_system
 
-#endif  // ibeacon_H_
+#endif  // BRDF_RECEIVER_MAIN_IBEACON_H_

@@ -1,9 +1,8 @@
-#ifndef BLE_SERVICES_H_
-#define BLE_SERVICES_H_
+#ifndef BRDF_BEACON_MAIN_BLE_SERVICES_H_
+#define BRDF_BEACON_MAIN_BLE_SERVICES_H_
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include <esp_bt.h>
 #include <esp_bt_defs.h>
 #include <esp_bt_main.h>
@@ -16,7 +15,7 @@
 #include "ble_device.h"
 #include "brdf_beacon_interface.h"
 
-namespace BrdfBeaconSystem {
+namespace brdf_beacon_system {
 
 class BleVoltageCharacteristic final : public BleCharacteristicInterface {
  public:
@@ -83,6 +82,6 @@ class BleBRDFService final : public BleServiceInterface {
   std::vector<BleCharacteristicInterfaceSharedPtr> characteristics_;
 };
 
-}  // namespace BrdfBeaconSystem
+}  // namespace brdf_beacon_system
 
-#endif  // BLE_SERVICE_DUMMY_H_
+#endif  // BRDF_BEACON_MAIN_BLE_SERVICES_H_

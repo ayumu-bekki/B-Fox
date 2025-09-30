@@ -1,10 +1,10 @@
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include "logger.h"
 
-namespace BrdfBeaconSystem::Logger {
+namespace brdf_beacon_system {
+namespace logger {
 
 void InitializeLogLevel() {
 #if CONFIG_DEBUG != 0
@@ -17,4 +17,5 @@ void InitializeLogLevel() {
 #endif
 }
 
-}  // namespace BrdfBeaconSystem::Logger
+}  // namespace logger
+}  // namespace brdf_beacon_system

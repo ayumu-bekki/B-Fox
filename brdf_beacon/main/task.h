@@ -1,38 +1,37 @@
-#ifndef TASK_H_
-#define TASK_H_
+#ifndef BRDF_BEACON_MAIN_TASK_H_
+#define BRDF_BEACON_MAIN_TASK_H_
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
 #include <string>
 
-namespace BrdfBeaconSystem {
+namespace brdf_beacon_system {
 
 /// FreeRTOS xTask Wrap
 class Task {
  public:
   enum TaskStatus {
-    TASK_STATUS_READY,
-    TASK_STATUS_RUN,
-    TASK_STATUS_END,
+    kReady,
+    kRun,
+    kEnd,
   };
 
-  static constexpr int32_t TASK_STAC_DEPTH = 8192;
+  static constexpr int32_t kTaskStackDepth = 8192;
 
   /// Task Priority
-  static constexpr int32_t PRIORITY_TOP = (configMAX_PRIORITIES)-1;
-  static constexpr int32_t PRIORITY_LOW = 0;
-  static constexpr int32_t PRIORITY_NORMAL = PRIORITY_TOP - 4;
-  static constexpr int32_t PRIORITY_HIGH = PRIORITY_TOP - 3;
+  static constexpr int32_t kPriorityTop = (configMAX_PRIORITIES)-1;
+  static constexpr int32_t kPriorityLow = 0;
+  static constexpr int32_t kPriorityNormal = kPriorityTop - 4;
+  static constexpr int32_t kPriorityHigh = kPriorityTop - 3;
 
  private:
   Task();
 
  public:
-  Task(const std::string& taskName, const int32_t priority, const int coreId);
+  Task(const std::string& task_name, const int32_t priority, const int core_id);
   virtual ~Task();
 
   /// Start Task
@@ -52,22 +51,22 @@ class Task {
   void Run();
 
   /// Task Listener
-  static void Listener(void* const pParam);
+  static void Listener(void* const param);
 
  protected:
   /// Task Status
-  TaskStatus m_Status;
+  TaskStatus status_;
 
   /// Task Name
-  std::string m_TaskName;
+  std::string task_name_;
 
   /// Task Priority
-  int32_t m_Priority;
+  int32_t priority_;
 
   /// Use Core Id
-  int32_t m_CoreId;
+  int32_t core_id_;
 };
 
-}  // namespace BrdfBeaconSystem
+}  // namespace brdf_beacon_system
 
-#endif  // TASK_H_
+#endif  // BRDF_BEACON_MAIN_TASK_H_

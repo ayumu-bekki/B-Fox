@@ -1,12 +1,12 @@
-#ifndef ST7032_H_
-#define ST7032_H_
+#ifndef BRDF_RECEIVER_MAIN_ST7032_H_
+#define BRDF_RECEIVER_MAIN_ST7032_H_
+
+#include <driver/i2c.h>
+#include <esp_log.h>
 
 #include <cstring>
 #include <memory>
 #include <string>
-
-#include <driver/i2c.h>
-#include <esp_log.h>
 
 namespace brdf_receiver_system {
 
@@ -25,13 +25,11 @@ class ST7032 {
 
   static constexpr uint8_t kLcdExSetbiasosc =
       0x10;  // Bias selection / Internal OSC frequency adjust
-  static constexpr uint8_t kLcdExSeticonramaddr =
-      0x40;  // Set ICON RAM address
+  static constexpr uint8_t kLcdExSeticonramaddr = 0x40;  // Set ICON RAM address
   static constexpr uint8_t kLcdExPowiconcontrasth =
       0x50;  // Power / ICON control / Contrast set(high byte)
   static constexpr uint8_t kLcdExFollowercontrol = 0x60;  // Follower control
-  static constexpr uint8_t kLcdExContrastsetl =
-      0x70;  // Contrast set(low byte)
+  static constexpr uint8_t kLcdExContrastsetl = 0x70;  // Contrast set(low byte)
 
   static constexpr uint8_t kLcdEntryright = 0x00;
   static constexpr uint8_t kLcdEntryleft = 0x02;
@@ -44,11 +42,6 @@ class ST7032 {
   static constexpr uint8_t kLcdCursoroff = 0x00;
   static constexpr uint8_t kLcdBlinkon = 0x01;
   static constexpr uint8_t kLcdBlinkoff = 0x00;
-
-  static constexpr uint8_t kLcdDisplaymove = 0x08;
-  static constexpr uint8_t kLcdCursormove = 0x00;
-  static constexpr uint8_t kLcdMoveright = 0x04;
-  static constexpr uint8_t kLcdMoveleft = 0x00;
 
   static constexpr uint8_t kLcd8bitmode = 0x10;
   static constexpr uint8_t kLcd4bitmode = 0x00;
@@ -97,12 +90,12 @@ class ST7032 {
   void SetContrast(uint8_t cont);
   void Clear();
   void SetCursor(uint8_t col, uint8_t row);
-  void Print(const std::string &s);
+  void Print(const std::string& s);
   void Print(const char str[]);
-  void Printf(const char *format, ...);
-  void Vprintf(const char *format, va_list arg);
+  void Printf(const char* format, ...);
+  void Vprintf(const char* format, va_list arg);
 
-  void Write(const uint8_t *buffer, size_t size);
+  void Write(const uint8_t* buffer, size_t size);
   void Write(const uint8_t value);
   void Command(const uint8_t value);
 
@@ -127,8 +120,6 @@ class ST7032 {
 using ST7032UniquePtr = std::unique_ptr<ST7032>;
 using ST7032SharedPtr = std::shared_ptr<ST7032>;
 
-
-
 }  // namespace brdf_receiver_system
 
-#endif  // ST7032_H_
+#endif  // BRDF_RECEIVER_MAIN_ST7032_H_

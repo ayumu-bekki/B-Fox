@@ -1,11 +1,12 @@
-#ifndef MESSAGE_QUEUE_H_
-#define MESSAGE_QUEUE_H_
+#ifndef BRDF_BEACON_MAIN_MESSAGE_QUEUE_H_
+#define BRDF_BEACON_MAIN_MESSAGE_QUEUE_H_
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
+
+namespace brdf_beacon_system {
 
 template <typename T>
 class MessageQueue {
@@ -14,11 +15,11 @@ class MessageQueue {
 
   virtual ~MessageQueue() { Destroy(); }
 
-  bool Create(const int32_t queueSize = 1) {
+  bool Create(const int32_t queue_size = 1) {
     if (queue_) {
       return true;
     }
-    queue_ = xQueueCreate(queueSize, sizeof(T));
+    queue_ = xQueueCreate(queue_size, sizeof(T));
     if (!queue_) {
       return false;
     }
@@ -75,4 +76,6 @@ class MessageQueue {
   QueueHandle_t queue_;
 };
 
-#endif  // MESSAGE_QUEUE_H_
+}  // namespace brdf_beacon_system
+
+#endif  // BRDF_BEACON_MAIN_MESSAGE_QUEUE_H_

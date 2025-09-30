@@ -1,5 +1,5 @@
-#ifndef GPIO_H_
-#define GPIO_H_
+#ifndef BRDF_RECEIVER_MAIN_GPIO_CONTROL_H_
+#define BRDF_RECEIVER_MAIN_GPIO_CONTROL_H_
 // ESP32 BRDF Receiver
 // (C)2025 bekki.jp
 
@@ -34,4 +34,4 @@ uint32_t GetAdcVoltage(const int32_t adc_channel_no, const int32_t round = 1);
 }  // namespace gpio
 }  // namespace brdf_receiver_system
 
-#endif  // GPIO_H_
+#endif  // BRDF_RECEIVER_MAIN_GPIO_CONTROL_H_

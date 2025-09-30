@@ -1,5 +1,5 @@
-#ifndef BLE_BEACON_ITEM_H_
-#define BLE_BEACON_ITEM_H_
+#ifndef BRDF_RECEIVER_MAIN_BLE_BEACON_ITEM_H_
+#define BRDF_RECEIVER_MAIN_BLE_BEACON_ITEM_H_
 // ESP32 BRDF Receiver
 // (C)2025 bekki.jp
 
@@ -18,4 +18,4 @@ struct BleBeaconItem {
 
 }  // namespace brdf_receiver_system
 
-#endif  // BLE_BEACON_ITEM_H_
+#endif  // BRDF_RECEIVER_MAIN_BLE_BEACON_ITEM_H_

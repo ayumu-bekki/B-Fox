@@ -1,9 +1,8 @@
-#ifndef BEACON_SETTING_H_
-#define BEACON_SETTING_H_
+#ifndef BRDF_BEACON_MAIN_BEACON_SETTING_H_
+#define BRDF_BEACON_MAIN_BEACON_SETTING_H_
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include <cJSON.h>
 #include <esp_bt.h>
 
@@ -11,17 +10,17 @@
 #include <memory>
 #include <string>
 
-namespace BrdfBeaconSystem {
+namespace brdf_beacon_system {
 
 class BeaconSetting final {
  public:
   enum TxPower {
-    None = 0,  // None
-    High,      // + 9dbm (8mW)    ESP_PWR_LVL_P9
-    Mid,       // + 6dbm (4mW)    ESP_PWR_LVL_P6
-    Low,       // + 3dbm (2mW)    ESP_PWR_LVL_P3
-    S_Low,     // -12dBm (0.06mW) ESP_PWR_LVL_N12
-    MaxTxPower,
+    kNone = 0,  // None
+    kHigh,      // + 9dbm (8mW)    ESP_PWR_LVL_P9
+    kMid,       // + 6dbm (4mW)    ESP_PWR_LVL_P6
+    kLow,       // + 3dbm (2mW)    ESP_PWR_LVL_P3
+    kSLow,      // -12dBm (0.06mW) ESP_PWR_LVL_N12
+    kMaxTxPower,
   };
 
  public:
@@ -63,7 +62,6 @@ using BeaconSettingConstSharedPtr = std::shared_ptr<const BeaconSetting>;
 using BeaconSettingWeakPtr = std::weak_ptr<BeaconSetting>;
 using BeaconSettingConstWeakPtr = std::weak_ptr<const BeaconSetting>;
 
-}  // namespace BrdfBeaconSystem
+}  // namespace brdf_beacon_system
 
-#endif  // BEACON_SETTING_H_
-// EOF
+#endif  // BRDF_BEACON_MAIN_BEACON_SETTING_H_

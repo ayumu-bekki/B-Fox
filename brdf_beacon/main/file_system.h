@@ -1,13 +1,13 @@
-#ifndef FILE_SYSTEM_H_
-#define FILE_SYSTEM_H_
+#ifndef BRDF_BEACON_MAIN_FILE_SYSTEM_H_
+#define BRDF_BEACON_MAIN_FILE_SYSTEM_H_
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 // FileSystem
 
-// Include ----------------------
 #include <string>
 
-namespace BrdfBeaconSystem::FileSystem {
+namespace brdf_beacon_system {
+namespace file_system {
 
 /// Mount File system
 bool Mount();
@@ -24,7 +24,7 @@ bool Read(const std::string& file_path, std::string& body);
 /// Delete
 bool Delete(const std::string& file_path);
 
-}  // namespace BrdfBeaconSystem::FileSystem
+}  // namespace file_system
+}  // namespace brdf_beacon_system
 
-#endif  // FILE_SYSTEM_H_
-// EOF
+#endif  // BRDF_BEACON_MAIN_FILE_SYSTEM_H_

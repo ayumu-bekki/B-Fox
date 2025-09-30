@@ -1,4 +1,4 @@
-// ESP32 BRDF Beacon
+// ESP32 BRDF Receiver
 // (C)2025 bekki.jp
 
 // Include ----------------------
@@ -13,20 +13,20 @@
 
 namespace brdf_receiver_system {
 
-constexpr char *const kSettingFileName = (char *)"receiver_setting.json";
+constexpr const char* kSettingFileName = "receiver_setting.json";
 
 ReceiverSetting::ReceiverSetting() : is_active_(false), major_(0) {}
 
 bool ReceiverSetting::Save() {
-  cJSON *json = cJSON_CreateObject();
-  if (json == NULL) {
+  cJSON* json = cJSON_CreateObject();
+  if (json == nullptr) {
     ESP_LOGE(kTag, "Failed Create JSON Object");
     return false;
   }
   cJSON_AddNumberToObject(json, "major", major_);
 
   // Convert JSON to string
-  char *json_string = cJSON_PrintUnformatted(json);
+  char* json_string = cJSON_PrintUnformatted(json);
   if (json_string == nullptr) {
     ESP_LOGE(kTag, "Failed JSON String");
     cJSON_Delete(json);
@@ -52,10 +52,10 @@ bool ReceiverSetting::Load() {
 
   major_ = 0;
 
-  cJSON *json_root = nullptr;
+  cJSON* json_root = nullptr;
   json_root = cJSON_Parse(body.c_str());
   if (!json_root) {
-    const char *error_ptr = cJSON_GetErrorPtr();
+    const char* error_ptr = cJSON_GetErrorPtr();
     if (error_ptr) {
       ESP_LOGE(kTag, "Parse Error %s", error_ptr);
       return false;
@@ -65,7 +65,7 @@ bool ReceiverSetting::Load() {
   }
 
   // Major
-  const cJSON *const json_major =
+  const cJSON* json_major =
       cJSON_GetObjectItemCaseSensitive(json_root, "major");
   if (!cJSON_IsNumber(json_major)) {
     ESP_LOGE(kTag, "Illegal object type major.");

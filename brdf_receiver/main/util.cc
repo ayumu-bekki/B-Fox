@@ -4,15 +4,15 @@
 // Include ----------------------
 #include "util.h"
 
-#include <cmath>
-#include <iomanip>
-#include <sstream>
-
 #include <esp_sntp.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <lwip/err.h>
 #include <lwip/sys.h>
+
+#include <cmath>
+#include <iomanip>
+#include <sstream>
 
 #include "gpio_control.h"
 #include "logger.h"
@@ -22,8 +22,8 @@ namespace util {
 
 /// Sleep
 void SleepMillisecond(const uint32_t sleep_milliseconds) {
-  TickType_t lastWakeTime = xTaskGetTickCount();
-  vTaskDelayUntil(&lastWakeTime, sleep_milliseconds / portTICK_PERIOD_MS);
+  TickType_t last_wake_time = xTaskGetTickCount();
+  vTaskDelayUntil(&last_wake_time, sleep_milliseconds / portTICK_PERIOD_MS);
 }
 
 std::vector<std::string> SplitString(const std::string& str, const char delim) {

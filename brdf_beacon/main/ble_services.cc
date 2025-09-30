@@ -1,7 +1,6 @@
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include "ble_services.h"
 
 #include <freertos/FreeRTOS.h>
@@ -15,7 +14,7 @@
 #include "logger.h"
 #include "util.h"
 
-namespace BrdfBeaconSystem {
+namespace brdf_beacon_system {
 
 BleVoltageCharacteristic::BleVoltageCharacteristic(
     esp_bt_uuid_t characteristic_uuid, esp_gatt_char_prop_t property,
@@ -181,8 +180,7 @@ void BleBRDFService::GattsEvent(esp_gatts_cb_event_t event,
     ESP_LOGI(TAG, "GATT_READ_EVT, conn_id %d, trans_id %" PRIu32 ", handle %d",
              param->read.conn_id, param->read.trans_id, param->read.handle);
 
-    for (BleCharacteristicInterfaceSharedPtr bleCharacteristic :
-         characteristics_) {
+    for (const auto& bleCharacteristic : characteristics_) {
       if (bleCharacteristic->GetHandle() == param->read.handle) {
         std::vector<uint8_t> data;
         bleCharacteristic->Read(&data);
@@ -206,8 +204,7 @@ void BleBRDFService::GattsEvent(esp_gatts_cb_event_t event,
              param->write.conn_id, param->write.trans_id, param->write.handle,
              param->write.need_rsp ? 1 : 0);
 
-    for (BleCharacteristicInterfaceSharedPtr bleCharacteristic :
-         characteristics_) {
+    for (const auto& bleCharacteristic : characteristics_) {
       if (bleCharacteristic->GetHandle() == param->write.handle) {
         std::vector<uint8_t> data(param->write.value,
                                   param->write.value + param->write.len);
@@ -229,8 +226,7 @@ void BleBRDFService::GattsEvent(esp_gatts_cb_event_t event,
     const uint16_t service_handle = param->create.service_handle;
     esp_ble_gatts_start_service(service_handle);
 
-    for (BleCharacteristicInterfaceSharedPtr bleCharacteristic :
-         characteristics_) {
+    for (const auto& bleCharacteristic : characteristics_) {
       esp_bt_uuid_t uuid = bleCharacteristic->GetUuid();
       esp_err_t add_char_ret = esp_ble_gatts_add_char(
           service_handle, &uuid, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
@@ -248,8 +244,7 @@ void BleBRDFService::GattsEvent(esp_gatts_cb_event_t event,
       return;
     }
 
-    for (BleCharacteristicInterfaceSharedPtr bleCharacteristic :
-         characteristics_) {
+    for (const auto& bleCharacteristic : characteristics_) {
       esp_bt_uuid_t uuid = bleCharacteristic->GetUuid();
       if (std::memcmp(&uuid, &param->add_char.char_uuid,
                       sizeof(param->add_char.char_uuid)) == 0) {
@@ -319,4 +314,4 @@ uint16_t BleBRDFService::GetAppId() const { return app_id_; }
 
 uint16_t BleBRDFService::GetGattsIf() const { return gatts_if_; }
 
-}  // namespace BrdfBeaconSystem
+}  // namespace brdf_beacon_system

@@ -1,10 +1,14 @@
-#ifndef VERSION_H_
-#define VERSION_H_
+#ifndef BRDF_RECEIVER_MAIN_VERSION_H_
+#define BRDF_RECEIVER_MAIN_VERSION_H_
 // ESP32 BRDF Receiver
 // (C)2025 bekki.jp
 
 #include <string>
 
-constexpr std::string_view GIT_VERSION = "@GIT_VERSION@";
+namespace brdf_receiver_system {
 
-#endif  // VERSION_H_
+constexpr std::string_view kGitVersion = "@GIT_VERSION@";
+
+}  // namespace brdf_receiver_system
+
+#endif  // BRDF_RECEIVER_MAIN_VERSION_H_

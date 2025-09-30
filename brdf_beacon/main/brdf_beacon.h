@@ -1,16 +1,15 @@
-#ifndef brdf_beacon_H_
-#define brdf_beacon_H_
+#ifndef BRDF_BEACON_MAIN_BRDF_BEACON_H_
+#define BRDF_BEACON_MAIN_BRDF_BEACON_H_
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include <memory>
 
 #include "beacon_setting.h"
 #include "brdf_beacon_interface.h"
 #include "voltage_check_task.h"
 
-namespace BrdfBeaconSystem {
+namespace brdf_beacon_system {
 
 /// BrdfBeacon
 class BrdfBeacon final : public BrdfBeaconInterface,
@@ -32,6 +31,6 @@ class BrdfBeacon final : public BrdfBeaconInterface,
   BeaconSettingSharedPtr setting_;
 };
 
-}  // namespace BrdfBeaconSystem
+}  // namespace brdf_beacon_system
 
-#endif  // brdf_beacon_H_
+#endif  // BRDF_BEACON_MAIN_BRDF_BEACON_H_

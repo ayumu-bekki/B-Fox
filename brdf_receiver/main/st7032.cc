@@ -1,8 +1,8 @@
 #include "st7032.h"
 
-#include <memory>
-
 #include <rom/ets_sys.h>
+
+#include <memory>
 
 namespace brdf_receiver_system {
 
@@ -44,11 +44,11 @@ void ST7032::Setup(i2c_port_t i2c_port, const uint8_t address,
   ExtendFunctionSet();
   Command(kLcdExSetbiasosc | kLcdBias1_5 | kLcdOsc183hz);
   Command(kLcdExFollowercontrol | kLcdFollowerOn | kLcdRab2_00);
-  vTaskDelay(200 / portTICK_PERIOD_MS); // 200ms
+  vTaskDelay(200 / portTICK_PERIOD_MS);  // 200ms
   NormalFunctionSet();
 
   // turn the display on with no cursor or blinking default
-  display_control_ = 0x00;  // LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;
+  display_control_ = 0x00;
   SetDisplayControl(kLcdDisplayon | kLcdCursoroff | kLcdBlinkoff);
 
   Clear();
@@ -70,7 +70,6 @@ void ST7032::Clear() {
   Command(kLcdClearDisplay);
   ets_delay_us(2000);
 }
-
 
 void ST7032::SetCursor(uint8_t col, uint8_t row) {
   const int row_offsets[] = {0x00, 0x40, 0x14, 0x54};
@@ -99,7 +98,7 @@ void ST7032::Printf(const char *format, ...) {
 void ST7032::Vprintf(const char *format, va_list arg) {
   constexpr size_t STACK_BUF_SIZE = 64;
   char stack_buf[STACK_BUF_SIZE] = {};
-    
+
   va_list copy;
   va_copy(copy, arg);
   const int len = vsnprintf(stack_buf, STACK_BUF_SIZE, format, copy);
@@ -111,15 +110,14 @@ void ST7032::Vprintf(const char *format, va_list arg) {
 
   if (len < STACK_BUF_SIZE) {
     // If the stack buffer is sufficient
-    Write(reinterpret_cast<uint8_t*>(stack_buf), len);
+    Write(reinterpret_cast<uint8_t *>(stack_buf), len);
   } else {
     // If dynamic allocation is required
     auto heap_buf = std::make_unique<char[]>(len + 1);
     vsnprintf(heap_buf.get(), len + 1, format, arg);
-    Write(reinterpret_cast<uint8_t*>(heap_buf.get()), len);
+    Write(reinterpret_cast<uint8_t *>(heap_buf.get()), len);
   }
 }
-
 
 void ST7032::Command(const uint8_t value) {
   i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -176,6 +174,5 @@ void ST7032::NormalFunctionSet() {
 void ST7032::ExtendFunctionSet() {
   Command(kLcdFunctionSet | display_function_ | kLcdExInstruction);
 }
-
 
 }  // namespace brdf_receiver_system

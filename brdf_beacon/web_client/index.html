@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=700, maximum-scale=1.0, user-scalable=yes">
-  <title>BRDF Beacon Control Panel</title>
+  <title>BleRDF Beacon Control Panel</title>
   <link rel="stylesheet" href="style.css">
   <script type="text/javascript" src="bluejelly.js"></script>
   <script>
@@ -21,7 +21,7 @@
     };
 
     ble.onWrite = function(uuid) {
-      alert("Settings have been written.\nPlease reconnect after the device reboots.");
+      alert("Settings saved.\nPlease reconnect after reboot.");
       location.reload();
     };
 
@@ -72,7 +72,7 @@
 
     window.onload = function() {
       document.getElementById('connect').addEventListener('click', function() {
-        document.getElementById('status').innerHTML = "Connectiong...";
+        document.getElementById('status').innerHTML = "Connecting...";
         document.getElementById('connect').disabled = "disable";
         document.getElementById('connect_panel').style.display = "none";
         //return (ble.scan('BrdfBeaconSetting')).then( () => {
@@ -107,13 +107,13 @@
 <body>
   <div class="container">
     <div class="title margin">
-      <h1 class="title">BRDF Beacon Control Panel</h1>
+      <h1 class="title">BleRDF Beacon Control Panel</h1>
     </div>
     <div class="contents margin">
       <p>Status : <span id="status">Not connected</span></p>
 
       <div id="connect_panel">
-        <p>The default device name is BRDF Beacon.</p>
+        <p>Default device name is BleRDF Beacon.</p>
         <p><button id="connect" class="button">Connect</button></p>
       </div>
 
@@ -131,43 +131,43 @@
           <div class="form-group">
             <label for="device_name">Device Name</label>
             <input type="text" id="device_name" name="device_name" minlength="3" maxlength="26" placeholder="Enter Bluetooth device name" required>
-            <div class="rules">📝 3 to 26 characters</div>
-            <div class="error">⚠️ Please enter between 3 and 26 characters.</div>
+            <div class="rules">📝 3-26 characters</div>
+            <div class="error">⚠️  Please enter 3-26 characters</div>
           </div>
 
           <div class="form-group">
             <label for="major">Major</label>
             <input type="number" id="major" name="major" min="0" max="9" required>
-            <div class="rules">📝 Value from 0-9</div>
-            <div class="error">⚠️ Please enter a value between 3 and 26 characters.</div>
+            <div class="rules">📝 Number from 0 to 9</div>
+            <div class="error">⚠️  Please enter a number from 0 to 9</div>
           </div>
 
           <div class="form-group">
             <label for="minor">Minor</label>
             <input type="number" id="minor" name="minor" min="0" max="9" required>
-            <div class="rules">📝 Value from 0-9</div>
-            <div class="error">⚠️ Please enter a value between 3 and 26 characters.</div>
+            <div class="rules">📝 Number from 0 to 9</div>
+            <div class="error">⚠️  Please enter a number from 0 to 9</div>
           </div>
 
           <div class="form-group">
             <label for="measured_power">Measured Power</label>
             <input type="number" id="measured_power" name="measured_power" min="-100" max="-40" required>
-            <div class="rules">📝 Value from -100 to -40</div>
-            <div class="error">⚠️ Please enter a value between -100 and -40.</div>
+            <div class="rules">📝 Number from -40 to -100</div>
+            <div class="error">⚠️  Please enter a number from -40 to -100</div>
           </div>
 
           <div class="form-group">
             <label for="tx_power">TX Power</label>
             <select id="tx_power" name="tx_power" required>
-              <option value="" disabled>Select an option</option>
-              <option value="1">High</option>
-              <option value="2">Mid</option>
-              <option value="3">Low</option>
-              <option value="4">S_Low</option>
+              <option value="" disabled>Please select</option>
+              <option value="1">High   +9dbm (8mW)</option>
+              <option value="2">Mid    +6dbm (4mW) </option>
+              <option value="3">Low    +3dbm (2mW)</option>
+              <option value="4">S_Low -12dBm (0.06mW)</option>
             </select>
           </div>
 
-          <button id="update_setting" class="button">Apply (Reboot)</button>
+          <button id="update_setting" class="button">Apply Settings (Reboot)</button>
         </form>
 
       </div>

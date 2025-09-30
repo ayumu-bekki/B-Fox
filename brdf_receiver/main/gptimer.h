@@ -1,5 +1,5 @@
-#ifndef GPTIMER_H_
-#define GPTIMER_H_
+#ifndef BRDF_RECEIVER_MAIN_GPTIMER_H_
+#define BRDF_RECEIVER_MAIN_GPTIMER_H_
 // ESP32 BRDF Receiver
 // (C)2025 bekki.jp
 
@@ -17,7 +17,7 @@ class GPTimer {
   ~GPTimer() { Destroy(); }
 
   void Create(const uint32_t resolution, gptimer_alarm_cb_t function,
-              void *const user_data) {
+              void* const user_data) {
     // Create Timer
     gptimer_config_t timer_config = {
         .clk_src = GPTIMER_CLK_SRC_DEFAULT,
@@ -63,9 +63,10 @@ class GPTimer {
   }
 
  private:
+  // Mutable to allow const methods to call ESP-IDF driver functions
   mutable gptimer_handle_t gptimer_;
 };
 
 }  // namespace brdf_receiver_system
 
-#endif  // GPTIMER_H_
+#endif  // BRDF_RECEIVER_MAIN_GPTIMER_H_

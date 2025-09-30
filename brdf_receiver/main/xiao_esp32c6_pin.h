@@ -1,5 +1,5 @@
-#ifndef xiao_esp32c6_pin_H_
-#define xiao_esp32c6_pin_H_
+#ifndef BRDF_RECEIVER_MAIN_XIAO_ESP32C6_PIN_H_
+#define BRDF_RECEIVER_MAIN_XIAO_ESP32C6_PIN_H_
 // ESP32 BRDF Receiver
 // (C)2025 bekki.jp
 
@@ -8,19 +8,19 @@
 namespace brdf_receiver_system {
 namespace xiao_esp32c6_pin {
 
-constexpr gpio_num_t SDA = static_cast<gpio_num_t>(22);
-constexpr gpio_num_t SCL = static_cast<gpio_num_t>(23);
+constexpr gpio_num_t kSda = static_cast<gpio_num_t>(22);
+constexpr gpio_num_t kScl = static_cast<gpio_num_t>(23);
 
-constexpr gpio_num_t A0 = static_cast<gpio_num_t>(0);
-constexpr gpio_num_t D7 = static_cast<gpio_num_t>(17);
-constexpr gpio_num_t D9 = static_cast<gpio_num_t>(20);
+constexpr gpio_num_t kA0 = static_cast<gpio_num_t>(0);
+constexpr gpio_num_t kD7 = static_cast<gpio_num_t>(17);
+constexpr gpio_num_t kD9 = static_cast<gpio_num_t>(20);
 
 // RF (Wi-Fi & BLE)
-constexpr gpio_num_t WIFI_ENABLE = static_cast<gpio_num_t>(3);
+constexpr gpio_num_t kWifiEnable = static_cast<gpio_num_t>(3);
 // External Antenna
-constexpr gpio_num_t WIFI_ANT_CONFIG = static_cast<gpio_num_t>(14);
+constexpr gpio_num_t kWifiAntConfig = static_cast<gpio_num_t>(14);
 
 }  // namespace xiao_esp32c6_pin
 }  // namespace brdf_receiver_system
 
-#endif  // xiao_esp32c6_pin_H_
+#endif  // BRDF_RECEIVER_MAIN_XIAO_ESP32C6_PIN_H_

@@ -1,7 +1,6 @@
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include "beacon_setting.h"
 
 #include <algorithm>
@@ -11,10 +10,9 @@
 #include "file_system.h"
 #include "logger.h"
 
-namespace BrdfBeaconSystem {
+namespace brdf_beacon_system {
 
-constexpr char* const SETTING_FILE_NAME = (char*)"beacon_setting.json";
-
+constexpr const char kSettingFileName[] = "beacon_setting.json";
 
 BeaconSetting::BeaconSetting()
     : is_active_(false),
@@ -22,7 +20,7 @@ BeaconSetting::BeaconSetting()
       major_(0),
       minor_(0),
       measured_power_(-59),
-      tx_power_(TxPower::High) {}
+      tx_power_(TxPower::kHigh) {}
 
 bool BeaconSetting::Save() {
   // ex) {"device_name": "BRDF Beacon", "major":0, "minor":0}
@@ -46,7 +44,7 @@ bool BeaconSetting::Save() {
 
   ESP_LOGI(TAG, "OutJson:%s", json_string);
 
-  bool ret = FileSystem::Write(SETTING_FILE_NAME, json_string);
+  bool ret = file_system::Write(kSettingFileName, json_string);
 
   free(json_string);
   cJSON_Delete(json);
@@ -57,7 +55,7 @@ bool BeaconSetting::Save() {
 bool BeaconSetting::Load() {
   std::string body;
   const bool is_read_ok =
-      FileSystem::Read(SETTING_FILE_NAME, body);
+      file_system::Read(kSettingFileName, body);
   if (!is_read_ok) {
     return false;
   }
@@ -65,7 +63,7 @@ bool BeaconSetting::Load() {
   device_name_ = "";
   major_ = 0;
   minor_ = 0;
-  tx_power_ = TxPower::High;
+  tx_power_ = TxPower::kHigh;
 
   cJSON *json_root = nullptr;
   json_root = cJSON_Parse(body.c_str());
@@ -107,7 +105,7 @@ bool BeaconSetting::Load() {
     cJSON_Delete(json_root);
     return false;
   }
-  minor_ = json_major->valueint;
+  minor_ = json_minor->valueint;
 
   // TxPower
   const cJSON *const json_tx_power =
@@ -117,7 +115,7 @@ bool BeaconSetting::Load() {
     cJSON_Delete(json_root);
     return false;
   }
-  tx_power_ = json_major->valueint;
+  tx_power_ = json_tx_power->valueint;
 
   is_active_ = true;
 
@@ -127,7 +125,7 @@ bool BeaconSetting::Load() {
 }
 
 bool BeaconSetting::Delete() {
-  return FileSystem::Delete(SETTING_FILE_NAME);
+  return file_system::Delete(kSettingFileName);
 }
 
 bool BeaconSetting::IsActive() const { return is_active_; }
@@ -143,18 +141,18 @@ int32_t BeaconSetting::GetMeasuredPower() const { return measured_power_; }
 int32_t BeaconSetting::GetTxPower() const { return tx_power_; }
 
 esp_power_level_t BeaconSetting::GetEspTxPowerLevel() const {
-  if (tx_power_ <= 0 || MaxTxPower <= tx_power_) {
+  if (tx_power_ <= 0 || kMaxTxPower <= tx_power_) {
     ESP_LOGW(TAG, "Invalid Tx Power Value. %d", tx_power_);
     return ESP_PWR_LVL_P9;
   }
-  constexpr esp_power_level_t TxPowerToESPPowerLevelTable[MaxTxPower] = {
-      ESP_PWR_LVL_P9,   // None
-      ESP_PWR_LVL_P9,   // High
-      ESP_PWR_LVL_P6,   // Mid
-      ESP_PWR_LVL_P3,   // Low
-      ESP_PWR_LVL_N12,  // S_Low
+  constexpr esp_power_level_t kTxPowerToEspPowerLevelTable[kMaxTxPower] = {
+      ESP_PWR_LVL_P9,   // kNone
+      ESP_PWR_LVL_P9,   // kHigh
+      ESP_PWR_LVL_P6,   // kMid
+      ESP_PWR_LVL_P3,   // kLow
+      ESP_PWR_LVL_N12,  // kSLow
   };
-  return TxPowerToESPPowerLevelTable[tx_power_];
+  return kTxPowerToEspPowerLevelTable[tx_power_];
 }
 
 void BeaconSetting::SetDeviceName(const std::string &device_name) {
@@ -167,6 +165,4 @@ void BeaconSetting::SetMeasuredPower(int32_t measured_power) {
 }
 void BeaconSetting::SetTxPower(int32_t tx_power) { tx_power_ = tx_power; }
 
-}  // namespace BrdfBeaconSystem
-
-// EOF
+}  // namespace brdf_beacon_system

@@ -1,18 +1,14 @@
-#ifndef brdf_beacon_INTERFACE_H_
-#define brdf_beacon_INTERFACE_H_
+#ifndef BRDF_BEACON_MAIN_BRDF_BEACON_INTERFACE_H_
+#define BRDF_BEACON_MAIN_BRDF_BEACON_INTERFACE_H_
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include <chrono>
 #include <memory>
 
 #include "beacon_setting.h"
 
-namespace BrdfBeaconSystem {
-
-class BeaconSetting;
-using BeaconSettingConstWeakPtr = std::weak_ptr<const BeaconSetting>;
+namespace brdf_beacon_system {
 
 class BrdfBeaconInterface {
  public:
@@ -29,6 +25,6 @@ using BrdfBeaconInterfaceWeakPtr = std::weak_ptr<BrdfBeaconInterface>;
 using BrdfBeaconInterfaceConstWeakPtr =
     std::weak_ptr<const BrdfBeaconInterface>;
 
-}  // namespace BrdfBeaconSystem
+}  // namespace brdf_beacon_system
 
-#endif  // brdf_beacon_INTERFACE_H_
+#endif  // BRDF_BEACON_MAIN_BRDF_BEACON_INTERFACE_H_

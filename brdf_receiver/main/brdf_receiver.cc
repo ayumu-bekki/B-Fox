@@ -13,11 +13,11 @@
 #include "esp_gap_ble_api.h"
 #include "esp_sleep.h"
 #include "esp_system.h"
-#include "nvs_flash.h"
 #include "file_system.h"
 #include "gpio_control.h"
 #include "i2c_util.h"
 #include "logger.h"
+#include "nvs_flash.h"
 #include "receiver_setting.h"
 #include "st7032.h"
 #include "util.h"
@@ -41,6 +41,7 @@ static const uint8_t kTargetProximityUuid[16] = {
 
 constexpr int32_t kSearchModeSleepThreshold = 15;
 constexpr i2c_port_t kI2cPortNo = I2C_NUM_0;
+constexpr int kLcdDisplayLines = 2;
 
 BrdfReceiver::BrdfReceiver()
     : gpio_watcher_(),
@@ -57,7 +58,7 @@ void BrdfReceiver::Start() {
   logger::InitializeLogLevel();
 
   ESP_LOGI(kTag, "Startup BRDF Receiver. Version:%s",
-           std::string(GIT_VERSION).c_str());
+           std::string(kGitVersion).c_str());
 
   // Initialize NVS
   esp_err_t ret = nvs_flash_init();
@@ -95,8 +96,8 @@ void BrdfReceiver::Start() {
   major_ = setting.GetMajor();
 
   // Initialize I2C
-  i2c_util::InitializeMaster(kI2cPortNo, xiao_esp32c6_pin::SDA,
-                            xiao_esp32c6_pin::SCL);
+  i2c_util::InitializeMaster(kI2cPortNo, xiao_esp32c6_pin::kSda,
+                             xiao_esp32c6_pin::kScl);
 
   // ST7032 (LCD Display)
   st7032_.Setup(kI2cPortNo, ST7032::kI2cDefaultAddr, 16, 2);
@@ -117,16 +118,17 @@ void BrdfReceiver::Start() {
   esp_sleep_enable_ext1_wakeup((1ULL << kWakeupGpio), ESP_EXT1_WAKEUP_ANY_LOW);
 
   // Use Ext Antenna
-  gpio::InitOutput(xiao_esp32c6_pin::WIFI_ENABLE, false);
+  gpio::InitOutput(xiao_esp32c6_pin::kWifiEnable, false);
   util::SleepMillisecond(100);
-  gpio::InitOutput(xiao_esp32c6_pin::WIFI_ANT_CONFIG, true);
+  gpio::InitOutput(xiao_esp32c6_pin::kWifiAntConfig, true);
 
   // Set Button Event
   gpio_watcher_.AddMonitor(
       GpioInputWatchTask::GpioInfo(
-          xiao_esp32c6_pin::D7, std::bind(&BrdfReceiver::OnSetMajorButton, this),
+          xiao_esp32c6_pin::kD7,
+          std::bind(&BrdfReceiver::OnSetMajorButton, this),
           std::bind(&BrdfReceiver::OnSetMajorLongButton, this)),
-      GpioInputWatchTask::kPullUpResistorEnable);
+      GpioInputWatchTask::GpioPullUpDown::kPullUpResistorEnable);
   gpio_watcher_.Start();
 
   // Ble Receive Task
@@ -164,19 +166,19 @@ void BrdfReceiver::BeaconSearchMode() {
 
   // Get and display iBeacon information
   std::vector<BleBeaconItem> ble_beacon_list =
-      beacon_receive_task_->GetSSRISortedItems();
+      beacon_receive_task_->GetRSSISortedItems();
   if (ble_beacon_list.empty()) {
     st7032_.SetCursor(0, 0);
     st7032_.Print("NO SIGNAL       ");
     st7032_.SetCursor(0, 1);
     st7032_.Print("                ");
   } else {
-    for (int bleIdx = 0; bleIdx < 2; ++bleIdx) {
+    for (int bleIdx = 0; bleIdx < kLcdDisplayLines; ++bleIdx) {
       st7032_.SetCursor(0, bleIdx);
       if (ble_beacon_list.size() <= bleIdx) {
         st7032_.Print("                ");
       } else {
-        BleBeaconItem info = ble_beacon_list[bleIdx];
+        const BleBeaconItem& info = ble_beacon_list[bleIdx];
 
         st7032_.Printf("%d|", info.minor);
         for (int indicator_idx = 0; indicator_idx < kIndicatorRssiNum;

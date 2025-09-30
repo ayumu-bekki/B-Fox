@@ -1,16 +1,16 @@
-#ifndef BLE_RECEIVE_TASK_H_
-#define BLE_RECEIVE_TASK_H_
+#ifndef BRDF_RECEIVER_MAIN_BEACON_RECEIVE_TASK_H_
+#define BRDF_RECEIVER_MAIN_BEACON_RECEIVE_TASK_H_
 // ESP32 BRDF Receiver
 // (C)2025 bekki.jp
 
 // Include ----------------------
+#include <esp_gap_ble_api.h>
+#include <soc/soc.h>
+
 #include <memory>
 #include <mutex>
 #include <set>
 #include <vector>
-
-#include <esp_gap_ble_api.h>
-#include <soc/soc.h>
 
 #include "ble_beacon_item.h"
 #include "task.h"
@@ -19,12 +19,12 @@ namespace brdf_receiver_system {
 
 class BeaconReceiveTask final : public Task {
  public:
-  static constexpr char *const kTaskName = (char *)"BeaconReceiveTask";
+  static constexpr const char* kTaskName = "BeaconReceiveTask";
   static constexpr int kPriority = Task::kPriorityLow;
   static constexpr int kCoreId = tskNO_AFFINITY;
 
- public:
-  static BeaconReceiveTask *instance_;
+ private:
+  static BeaconReceiveTask* instance_;
 
  public:
   BeaconReceiveTask(const uint8_t target_proximity_uuid[16],
@@ -34,15 +34,15 @@ class BeaconReceiveTask final : public Task {
 
   void Update() override;
 
-  void EventGap(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
+  void EventGap(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t* param);
 
-  std::vector<BleBeaconItem> GetSSRISortedItems();
+  std::vector<BleBeaconItem> GetRSSISortedItems();
 
  private:
   static void EventGapStatic(esp_gap_ble_cb_event_t event,
-                             esp_ble_gap_cb_param_t *param);
+                             esp_ble_gap_cb_param_t* param);
 
-  bool IsIBeaconPacket(const uint8_t *const adv_data,
+  bool IsIBeaconPacket(const uint8_t* adv_data,
                        const uint8_t adv_data_len) const;
 
  private:
@@ -57,4 +57,4 @@ using BeaconReceiveTaskUniquePtr = std::unique_ptr<BeaconReceiveTask>;
 
 }  // namespace brdf_receiver_system
 
-#endif  // BLE_RECEIVE_TASK_H_
+#endif  // BRDF_RECEIVER_MAIN_BEACON_RECEIVE_TASK_H_

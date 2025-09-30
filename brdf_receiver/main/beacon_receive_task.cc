@@ -4,9 +4,6 @@
 // Include ----------------------
 #include "beacon_receive_task.h"
 
-#include <algorithm>
-#include <cstring>
-
 #include <esp_bt.h>
 #include <esp_bt_defs.h>
 #include <esp_bt_main.h>
@@ -15,6 +12,9 @@
 #include <esp_gattc_api.h>
 #include <freertos/FreeRTOS.h>
 
+#include <algorithm>
+#include <cstring>
+
 #include "gpio_control.h"
 #include "ibeacon.h"
 #include "logger.h"
@@ -22,7 +22,7 @@
 
 namespace brdf_receiver_system {
 
-BeaconReceiveTask *BeaconReceiveTask::instance_ = nullptr;
+BeaconReceiveTask* BeaconReceiveTask::instance_ = nullptr;
 
 BeaconReceiveTask::BeaconReceiveTask(const uint8_t target_proximity_uuid[16],
                                      const uint16_t target_major_id)
@@ -65,23 +65,23 @@ void BeaconReceiveTask::Initialize() {
 
 void BeaconReceiveTask::Update() { util::SleepMillisecond(2000); }
 
-std::vector<BleBeaconItem> BeaconReceiveTask::GetSSRISortedItems() {
+std::vector<BleBeaconItem> BeaconReceiveTask::GetRSSISortedItems() {
   std::vector<BleBeaconItem> ble_beacon_list;
   {
     std::scoped_lock lock(beacon_items_mutex_);
-    ble_beacon_list.insert(ble_beacon_list.end(), ble_beacon_items_.begin(),
-                           ble_beacon_items_.end());
+    ble_beacon_list.reserve(ble_beacon_items_.size());
+    ble_beacon_list.assign(ble_beacon_items_.begin(), ble_beacon_items_.end());
     ble_beacon_items_.clear();
   }
   std::sort(ble_beacon_list.begin(), ble_beacon_list.end(),
-            [](const BleBeaconItem &a, const BleBeaconItem &b) {
+            [](const BleBeaconItem& a, const BleBeaconItem& b) {
               return a.rssi > b.rssi;
             });
   return ble_beacon_list;
 }
 
 void BeaconReceiveTask::EventGap(esp_gap_ble_cb_event_t event,
-                                 esp_ble_gap_cb_param_t *param) {
+                                 esp_ble_gap_cb_param_t* param) {
   if (event == ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT) {
     // the unit of the duration is second, 0 means scan permanently
     uint32_t duration = 0;
@@ -97,18 +97,18 @@ void BeaconReceiveTask::EventGap(esp_gap_ble_cb_event_t event,
     if (param->scan_rst.search_evt == ESP_GAP_SEARCH_INQ_RES_EVT) {
       if (IsIBeaconPacket(param->scan_rst.ble_adv,
                           param->scan_rst.adv_data_len)) {
-        const BleIBeacon *const ibeacon_data =
-            reinterpret_cast<const BleIBeacon *>(param->scan_rst.ble_adv);
+        const BleIBeacon* ibeacon_data =
+            reinterpret_cast<const BleIBeacon*>(param->scan_rst.ble_adv);
         const uint16_t major =
-            endian_change_u16(ibeacon_data->ibeacon_vendor.major);
+            EndianChangeU16(ibeacon_data->ibeacon_vendor.major);
         const uint16_t minor =
-            endian_change_u16(ibeacon_data->ibeacon_vendor.minor);
-/*
-        ESP_LOGI(kTag, "iBeacon > major:0x%04x(%d) minor:0x%04x(%d) measured_power:%ddBm rssi:%ddBm", 
-                 major, major, minor, minor,
-                 ibeacon_data->ibeacon_vendor.measured_power,
-                 param->scan_rst.rssi);
-*/
+            EndianChangeU16(ibeacon_data->ibeacon_vendor.minor);
+        /*
+                ESP_LOGI(kTag, "iBeacon > major:0x%04x(%d) minor:0x%04x(%d)
+           measured_power:%ddBm rssi:%ddBm", major, major, minor, minor,
+                         ibeacon_data->ibeacon_vendor.measured_power,
+                         param->scan_rst.rssi);
+        */
         if (std::memcmp(ibeacon_data->ibeacon_vendor.proximity_uuid,
                         target_proximity_uuid_,
                         sizeof(target_proximity_uuid_)) != 0 ||
@@ -121,11 +121,11 @@ void BeaconReceiveTask::EventGap(esp_gap_ble_cb_event_t event,
         {
           std::scoped_lock lock(beacon_items_mutex_);
 
-          auto it = ble_beacon_items_.find(item);
-          if (it != ble_beacon_items_.end()) {
+          auto [it, inserted] = ble_beacon_items_.insert(item);
+          if (!inserted) {
             ble_beacon_items_.erase(it);
+            ble_beacon_items_.insert(item);
           }
-          ble_beacon_items_.insert(item);
         }
       }
     }
@@ -139,11 +139,11 @@ void BeaconReceiveTask::EventGap(esp_gap_ble_cb_event_t event,
   }
 }
 
-bool BeaconReceiveTask::IsIBeaconPacket(const uint8_t *const adv_data,
+bool BeaconReceiveTask::IsIBeaconPacket(const uint8_t* adv_data,
                                         const uint8_t adv_data_len) const {
   if (adv_data != nullptr && adv_data_len == 0x1e) {
-    if (!memcmp(adv_data, reinterpret_cast<const uint8_t *>(&IBEACON_HEADER),
-                sizeof(IBEACON_HEADER))) {
+    if (!memcmp(adv_data, reinterpret_cast<const uint8_t*>(&kIBeaconHeader),
+                sizeof(kIBeaconHeader))) {
       return true;
     }
   }
@@ -151,7 +151,7 @@ bool BeaconReceiveTask::IsIBeaconPacket(const uint8_t *const adv_data,
 }
 
 void BeaconReceiveTask::EventGapStatic(esp_gap_ble_cb_event_t event,
-                                       esp_ble_gap_cb_param_t *param) {
+                                       esp_ble_gap_cb_param_t* param) {
   // Since esp_ble_gap_cb_param_t does not have UserData, pass it to instance_.
   if (instance_ != nullptr) {
     instance_->EventGap(event, param);

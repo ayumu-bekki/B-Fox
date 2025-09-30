@@ -1,14 +1,14 @@
-#ifndef UTIL_H_
-#define UTIL_H_
+#ifndef BRDF_BEACON_MAIN_UTIL_H_
+#define BRDF_BEACON_MAIN_UTIL_H_
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include <chrono>
 #include <string>
 #include <vector>
 
-namespace BrdfBeaconSystem::Util {
+namespace brdf_beacon_system {
+namespace util {
 
 /// Sleep
 void SleepMillisecond(const uint32_t sleep_milliseconds);
@@ -16,6 +16,7 @@ void SleepMillisecond(const uint32_t sleep_milliseconds);
 /// Split Text
 std::vector<std::string> SplitString(const std::string& str, const char delim);
 
-}  // namespace BrdfBeaconSystem::Util
+}  // namespace util
+}  // namespace brdf_beacon_system
 
-#endif  // UTIL_H_
+#endif  // BRDF_BEACON_MAIN_UTIL_H_

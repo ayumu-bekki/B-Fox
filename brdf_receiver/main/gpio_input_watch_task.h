@@ -1,5 +1,5 @@
-#ifndef GPIO_INPUT_WATCH_TASK_H_
-#define GPIO_INPUT_WATCH_TASK_H_
+#ifndef BRDF_RECEIVER_MAIN_GPIO_INPUT_WATCH_TASK_H_
+#define BRDF_RECEIVER_MAIN_GPIO_INPUT_WATCH_TASK_H_
 // (C)2024 bekki.jp
 // GPIO input watch task
 
@@ -28,7 +28,7 @@ class GpioInputWatchTask final : public Task {
   static constexpr int32_t kLongEdgeCounter = 100;
 
  public:
-  enum GpioPullUpDown {
+  enum class GpioPullUpDown {
     kNone,
     kPullUpResistorEnable,
     kPullDownResistorEnable,
@@ -36,7 +36,7 @@ class GpioInputWatchTask final : public Task {
 
   class GpioInfo {
    public:
-    enum Status : int32_t {
+    enum class Status : int32_t {
       kStatusDisable,
       kStatusEnable,
       kStatusEnableLong,
@@ -49,12 +49,12 @@ class GpioInputWatchTask final : public Task {
           on_up_(on_up),
           on_long_up_(on_long_up),
           input_counter_(0),
-          status_(kStatusDisable) {}
+          status_(Status::kStatusDisable) {}
 
     gpio_num_t GetGpioNo() const { return gpio_no_; }
 
     void Check() {
-      if (status_ == kStatusDisable) {
+      if (status_ == Status::kStatusDisable) {
         if (gpio_get_level(gpio_no_) == 0) {
           if (input_counter_ < 0) {
             input_counter_ = 0;
@@ -62,7 +62,7 @@ class GpioInputWatchTask final : public Task {
           ++input_counter_;
         } else {
           if (kEdgeCounter <= input_counter_) {
-            status_ = kStatusEnable;
+            status_ = Status::kStatusEnable;
             if (on_up_) {
               on_up_();
             }
@@ -71,14 +71,14 @@ class GpioInputWatchTask final : public Task {
         }
         if (kLongEdgeCounter <= input_counter_) {
           input_counter_ = 0;
-          status_ = kStatusEnableLong;
+          status_ = Status::kStatusEnableLong;
           if (on_long_up_) {
             on_long_up_();
           }
         }
       } else {
         if (gpio_get_level(gpio_no_) != 0) {
-          status_ = kStatusDisable;
+          status_ = Status::kStatusDisable;
         }
       }
     }
@@ -98,14 +98,14 @@ class GpioInputWatchTask final : public Task {
         gptimer_(),
         gpio_list_() {
     // Create MessageQueue
-    constexpr int32_t MESSAGE_QUEUE_SIZE = 10;
-    if (!message_queue_.Create(MESSAGE_QUEUE_SIZE)) {
+    constexpr int32_t kMessageQueueSize = 10;
+    if (!message_queue_.Create(kMessageQueueSize)) {
       ESP_LOGE(kTag, "Creating queue failed");
     }
 
     // Create Timer
-    constexpr uint32_t GPIO_WATCH_RESOLUTION = 1000000u;  // 1us
-    gptimer_.Create(GPIO_WATCH_RESOLUTION, &GpioInputWatchTask::TimerCallback,
+    constexpr uint32_t kGpioWatchResolution = 1000000u;  // 1us
+    gptimer_.Create(kGpioWatchResolution, &GpioInputWatchTask::TimerCallback,
                     &message_queue_);
   }
 
@@ -123,9 +123,9 @@ class GpioInputWatchTask final : public Task {
     gptimer_.Start(5000);  // 5ms
     int event_type = 0;
     while (true) {
-      constexpr int32_t QUEUE_RECEIVE_LIMIT =
-          1000 / portTICK_PERIOD_MS;  // 最大待機tick
-      if (message_queue_.ReceiveWait(&event_type, QUEUE_RECEIVE_LIMIT)) {
+      constexpr int32_t kQueueReceiveLimit =
+          1000 / portTICK_PERIOD_MS;  // Maximum wait tick
+      if (message_queue_.ReceiveWait(&event_type, kQueueReceiveLimit)) {
         if (event_type == 1) {
           for (auto&& gpio_info : gpio_list_) {
             gpio_info.Check();
@@ -138,16 +138,17 @@ class GpioInputWatchTask final : public Task {
   void AddMonitor(GpioInfo gpio_info,
                   GpioPullUpDown gpio_pullupdown = GpioPullUpDown::kNone) {
     // Setting GPIO Input
-    // 注意:IO34～IO39は内部プルアップ/プルダウン抵抗は無し
+    // Note: IO34-IO39 do not have internal pull-up/pull-down resistors
     gpio_config_t io_input_conf = {
         .pin_bit_mask = 1ull << gpio_info.GetGpioNo(),
         .mode = GPIO_MODE_INPUT,
-        .pull_up_en =
-            (gpio_pullupdown == kPullUpResistorEnable ? GPIO_PULLUP_ENABLE
-                                                      : GPIO_PULLUP_DISABLE),
-        .pull_down_en = (gpio_pullupdown == kPullDownResistorEnable
-                             ? GPIO_PULLDOWN_ENABLE
-                             : GPIO_PULLDOWN_DISABLE),
+        .pull_up_en = (gpio_pullupdown == GpioPullUpDown::kPullUpResistorEnable
+                           ? GPIO_PULLUP_ENABLE
+                           : GPIO_PULLUP_DISABLE),
+        .pull_down_en =
+            (gpio_pullupdown == GpioPullUpDown::kPullDownResistorEnable
+                 ? GPIO_PULLDOWN_ENABLE
+                 : GPIO_PULLDOWN_DISABLE),
         .intr_type = GPIO_INTR_ANYEDGE,
     };
     gpio_config(&io_input_conf);
@@ -159,8 +160,7 @@ class GpioInputWatchTask final : public Task {
   static bool TimerCallback(gptimer_handle_t timer,
                             const gptimer_alarm_event_data_t* event_data,
                             void* message_queue) {
-    MessageQueue<int>* const queue =
-        static_cast<MessageQueue<int>*>(message_queue);
+    MessageQueue<int>* queue = static_cast<MessageQueue<int>*>(message_queue);
     return queue->SendFromISR(1);
   }
 
@@ -172,6 +172,6 @@ class GpioInputWatchTask final : public Task {
 
 }  // namespace brdf_receiver_system
 
-#endif  // GPIO_INPUT_WATCH_TASK_H_
+#endif  // BRDF_RECEIVER_MAIN_GPIO_INPUT_WATCH_TASK_H_
 
 // EOF

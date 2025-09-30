@@ -1,5 +1,5 @@
-#ifndef LOGGER_H_
-#define LOGGER_H_
+#ifndef BRDF_RECEIVER_MAIN_LOGGER_H_
+#define BRDF_RECEIVER_MAIN_LOGGER_H_
 // ESP32 BRDF Receiver
 // (C)2025 bekki.jp
 
@@ -22,4 +22,4 @@ void InitializeLogLevel();
 }  // namespace logger
 }  // namespace brdf_receiver_system
 
-#endif  // LOGGER_H_
+#endif  // BRDF_RECEIVER_MAIN_LOGGER_H_

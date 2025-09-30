@@ -1,12 +1,12 @@
-#ifndef IBEACON_H_
-#define IBEACON_H_
-// ESP32 BRDF Receiver
+#ifndef BRDF_BEACON_MAIN_IBEACON_H_
+#define BRDF_BEACON_MAIN_IBEACON_H_
+// ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 #include <esp_bt_defs.h>
 
 #include <cstring>
 
-namespace BrdfBeaconSystem {
+namespace brdf_beacon_system {
 
 // BLE basically uses little-endian, but iBeacon uses big-endian (network byte
 // order) in Apple's proprietary format. iBeacon header
@@ -32,12 +32,12 @@ struct __attribute__((packed)) BleIBeacon {
   BleIBeaconVendor ibeacon_vendor;
 };
 
-uint16_t endian_change_u16(const uint16_t data);
+uint16_t EndianChangeU16(const uint16_t data);
 
-BleIBeacon CreateiBeaconAttr(const uint8_t *const proximity_uuid,
+BleIBeacon CreateIBeaconAttr(const uint8_t *const proximity_uuid,
                              const uint16_t major, const uint16_t minor,
                              const int8_t measured_power);
 
-}  // namespace BrdfBeaconSystem
+}  // namespace brdf_beacon_system
 
-#endif  // IBEACON_H_
+#endif  // BRDF_BEACON_MAIN_IBEACON_H_

@@ -1,13 +1,12 @@
 // ESP32 BRDF Beacon
 // (C)2025 bekki.jp
 
-// Include ----------------------
 #include "ble_device.h"
 
 #include "ibeacon.h"
 #include "logger.h"
 
-namespace BrdfBeaconSystem {
+namespace brdf_beacon_system {
 
 static void gap_event(esp_gap_ble_cb_event_t event,
                       esp_ble_gap_cb_param_t *param) {
@@ -137,7 +136,7 @@ void BleDevice::GattsEvent(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
                            esp_ble_gatts_cb_param_t *param) {
   if (event == ESP_GATTS_REG_EVT) {
     if (param->reg.status == ESP_GATT_OK) {
-      for (BleServiceInterfaceSharedPtr bleService : services_) {
+      for (const auto& bleService : services_) {
         if (bleService->GetAppId() == param->reg.app_id) {
           bleService->SetGattsIf(gatts_if);
         }
@@ -149,7 +148,7 @@ void BleDevice::GattsEvent(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
     }
   }
 
-  for (BleServiceInterfaceSharedPtr bleService : services_) {
+  for (const auto& bleService : services_) {
     if (gatts_if == ESP_GATT_IF_NONE || gatts_if == bleService->GetGattsIf()) {
       bleService->GattsEvent(event, gatts_if, param);
     }
@@ -173,4 +172,4 @@ void BleDevice::StartAdvertising() {
   esp_ble_gap_start_advertising(&adv_params);
 }
 
-}  // namespace BrdfBeaconSystem
+}  // namespace brdf_beacon_system
