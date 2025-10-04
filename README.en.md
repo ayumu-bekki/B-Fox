@@ -20,7 +20,8 @@ We have created operation documentation (draft) with relaxed rules based on Park
 
 ## About Transmitters and Receivers
 
-[Transmitter/Receiver Device Documentation](./docs/README.md)
+Please refer to the [Transmitter/Receiver Device Documentation](./docs/README.md).
+This project includes a complete set of programs and data that can be output with PCB and 3D printers.
 
 ### Comparison
 
@@ -45,6 +46,6 @@ Contains transmitter/receiver programs, mechanical design, and operation methods
 - blerdf_beacon
   - Transmitter program suite
 - docs
-  - Technical documentation
+  - Technical documentation, PCB, Case (for 3D printer)
 - operation
   - Operations kit
