@@ -27,7 +27,29 @@
 
 namespace blerdf_beacon_system {
 
-constexpr gpio_num_t kMonitoringLedPin = xiao_esp32_pin::kD9;
+// kA0 Input Enable
+
+// Monitoring LED Pin GPIO
+constexpr gpio_num_t kMonitoringLedPin = xiao_esp32c6_pin::kD7;
+
+// Unused GPIO Pins
+const gpio_num_t kUnusedGpioPins[] = {
+  xiao_esp32c6_pin::kD1, 
+  xiao_esp32c6_pin::kD2, 
+  xiao_esp32c6_pin::kMtms,
+  xiao_esp32c6_pin::kMtdi,
+  xiao_esp32c6_pin::kMtck,
+  xiao_esp32c6_pin::kMtdo,
+  xiao_esp32c6_pin::kBoot,
+  xiao_esp32c6_pin::kLedBuiltin, 
+  xiao_esp32c6_pin::kTx,
+  xiao_esp32c6_pin::kMosi,
+  xiao_esp32c6_pin::kSck,
+  xiao_esp32c6_pin::kMiso,
+  xiao_esp32c6_pin::kSS,
+  xiao_esp32c6_pin::kSda,
+  xiao_esp32c6_pin::kScl,
+};
 
 // PROXIMITY_UUID (UUID for BleRDF Receiver), for iBeacon data, 128-bit, Big
 // Endian
@@ -61,19 +83,14 @@ void BleRDFBeacon::Start() {
   voltage_check_task_->Start();
 
   // Use Ext Antenna
-  gpio::InitOutput(xiao_esp32_pin::kWifiEnable, false);
+  gpio::InitOutput(xiao_esp32c6_pin::kWifiEnable, false); // Activate RF switch control (kWifiEnable = False)
   util::SleepMillisecond(100);
-  gpio::InitOutput(xiao_esp32_pin::kWifiAntConfig, true);
+  gpio::InitOutput(xiao_esp32c6_pin::kWifiAntConfig, true); // Use external antenna (KWifiAntConfig = True)
 
   // Set unused GPIOs to input with pull-up for stability
-  const gpio_num_t unused_gpios[] = {
-      GPIO_NUM_1, GPIO_NUM_2, GPIO_NUM_4, GPIO_NUM_5, GPIO_NUM_6,
-      GPIO_NUM_7, GPIO_NUM_8, GPIO_NUM_9, GPIO_NUM_10, GPIO_NUM_15,
-      GPIO_NUM_16, GPIO_NUM_17, GPIO_NUM_18, GPIO_NUM_19, GPIO_NUM_21,
-      GPIO_NUM_22, GPIO_NUM_23};
-  for (const auto& gpio_num : unused_gpios) {
+  for (const auto& gpio_num : kUnusedGpioPins) {
     gpio_set_direction(gpio_num, GPIO_MODE_INPUT);
-    gpio_set_pull_mode(gpio_num, GPIO_PULLUP_ONLY);
+    gpio_set_pull_mode(gpio_num, GPIO_PULLDOWN_ONLY);
   }
 
   // Initialize NVS
