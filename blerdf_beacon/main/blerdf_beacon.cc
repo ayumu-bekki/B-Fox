@@ -27,7 +27,7 @@
 
 namespace blerdf_beacon_system {
 
-constexpr gpio_num_t kMonitoringLedPin = static_cast<gpio_num_t>(20);
+constexpr gpio_num_t kMonitoringLedPin = xiao_esp32_pin::kD9;
 
 // PROXIMITY_UUID (UUID for BleRDF Receiver), for iBeacon data, 128-bit, Big
 // Endian
