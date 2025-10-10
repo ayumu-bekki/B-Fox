@@ -27,6 +27,8 @@
 
 namespace blerdf_beacon_system {
 
+constexpr gpio_num_t kMonitoringLedPin = static_cast<gpio_num_t>(20);
+
 // PROXIMITY_UUID (UUID for BleRDF Receiver), for iBeacon data, 128-bit, Big
 // Endian
 constexpr uint8_t kBleRDFIBeaconProximityUuid[ESP_UUID_LEN_128] = {
@@ -49,8 +51,7 @@ void BleRDFBeacon::Start() {
            std::string(kGitVersion).c_str());
 
   // Monitoring LED Init
-  gpio::InitOutput(static_cast<gpio_num_t>(CONFIG_MONITORING_OUTPUT_GPIO_NO),
-                   false);
+  gpio::InitOutput(kMonitoringLedPin, false);
 
   // Battery voltage monitoring
   voltage_check_task_ = std::make_unique<VoltageCheckTask>();
@@ -63,6 +64,17 @@ void BleRDFBeacon::Start() {
   gpio::InitOutput(xiao_esp32_pin::kWifiEnable, false);
   util::SleepMillisecond(100);
   gpio::InitOutput(xiao_esp32_pin::kWifiAntConfig, true);
+
+  // Set unused GPIOs to input with pull-up for stability
+  const gpio_num_t unused_gpios[] = {
+      GPIO_NUM_1, GPIO_NUM_2, GPIO_NUM_4, GPIO_NUM_5, GPIO_NUM_6,
+      GPIO_NUM_7, GPIO_NUM_8, GPIO_NUM_9, GPIO_NUM_10, GPIO_NUM_15,
+      GPIO_NUM_16, GPIO_NUM_17, GPIO_NUM_18, GPIO_NUM_19, GPIO_NUM_21,
+      GPIO_NUM_22, GPIO_NUM_23};
+  for (const auto& gpio_num : unused_gpios) {
+    gpio_set_direction(gpio_num, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(gpio_num, GPIO_PULLUP_ONLY);
+  }
 
   // Initialize NVS
   esp_err_t ret = nvs_flash_init();
@@ -91,11 +103,9 @@ void BleRDFBeacon::Start() {
   ESP_LOGI(TAG, "Activation Complete BleRDF Beacon System.");
 
   while (true) {
-    gpio::SetLevel(static_cast<gpio_num_t>(CONFIG_MONITORING_OUTPUT_GPIO_NO),
-                   true);
+    gpio::SetLevel(kMonitoringLedPin, true);
     util::SleepMillisecond(100);
-    gpio::SetLevel(static_cast<gpio_num_t>(CONFIG_MONITORING_OUTPUT_GPIO_NO),
-                   false);
+    gpio::SetLevel(kMonitoringLedPin, false);
 
     util::SleepMillisecond(1900);
   }

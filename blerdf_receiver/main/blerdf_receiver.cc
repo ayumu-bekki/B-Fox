@@ -25,6 +25,9 @@
 
 namespace blerdf_receiver_system {
 
+// Wakeup GPIO Pin
+constexpr gpio_num_t kWakeupGpio = GPIO_NUM_1; // D1
+
 constexpr float kBatteryDischargeLimit = 3.2f;
 constexpr int kIndicatorRssiNum = 6;
 const int kIndicatorRssiTargets[kIndicatorRssiNum] = {INT_MIN, -100, -80,
@@ -109,7 +112,6 @@ void BleRDFReceiver::Start() {
   st7032_.Printf(" Maj:%d Bat:%4.2fV", major_, voltage);
 
   // Setting to wake up from DeepSleep when D1 is LOW
-  constexpr gpio_num_t kWakeupGpio = GPIO_NUM_1;
   rtc_gpio_init(kWakeupGpio);
   rtc_gpio_set_direction(kWakeupGpio, RTC_GPIO_MODE_INPUT_ONLY);
   rtc_gpio_pullup_en(kWakeupGpio);
@@ -120,6 +122,16 @@ void BleRDFReceiver::Start() {
   gpio::InitOutput(xiao_esp32c6_pin::kWifiEnable, false);
   util::SleepMillisecond(100);
   gpio::InitOutput(xiao_esp32c6_pin::kWifiAntConfig, true);
+
+  // Set unused GPIOs to input with pull-up for stability
+  const gpio_num_t unused_gpios[] = {
+      GPIO_NUM_2, GPIO_NUM_4, GPIO_NUM_5, GPIO_NUM_6, GPIO_NUM_7,
+      GPIO_NUM_8, GPIO_NUM_9, GPIO_NUM_10, GPIO_NUM_15, GPIO_NUM_16,
+      GPIO_NUM_18, GPIO_NUM_19, GPIO_NUM_20, GPIO_NUM_21};
+  for (const auto& gpio_num : unused_gpios) {
+    gpio_set_direction(gpio_num, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(gpio_num, GPIO_PULLUP_ONLY);
+  }
 
   // Set Button Event
   gpio_watcher_.AddMonitor(

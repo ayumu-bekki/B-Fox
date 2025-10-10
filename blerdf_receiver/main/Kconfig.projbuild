@@ -1,9 +1,0 @@
-menu "BleRDF Receiver System Configuration"
-
-    config MONITORING_OUTPUT_GPIO_NO
-        int "Monitoring Output GPIO No"
-        default 20
-        help
-            GPIO number for monitoring signals
-
-endmenu
