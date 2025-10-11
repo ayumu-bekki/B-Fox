@@ -39,13 +39,16 @@ Can be received with smartphone apps like LightBlue ([https://punchthrough.com/l
 ## Hardware Manufacturing
 
 Case and PCB data are provided for both transmitters and receivers.
+For PCBs, it is also possible to build them on universal boards (36x47x1mm). Please refer to the KiCAD schematics.
+
+Boards and cases can be output using services like PCBWay ([https://www.pcbway.com](https://www.pcbway.com)).
 
 - PCB
   - Contains PCB design information. Editable with KiCAD.
-  - Boards and cases can be output using services like PCBWay ([https://www.pcbway.com](https://www.pcbway.com)).
-    - *_Gerber.zip can be used as-is. (Board size 36x47mm)
+    - *_Gerber.zip can be used as-is. (thickness 1mm)
 - Case
   - Cases that can be output with 3D printers are included. Editable with FreeCAD.
+    - *.step can be used as-is.
 
 ---
 

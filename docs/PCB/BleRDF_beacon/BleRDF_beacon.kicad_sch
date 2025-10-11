@@ -1518,16 +1518,16 @@
 		)
 	)
 	(junction
+		(at 182.88 102.87)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "0874d3b4-e23c-4124-80dd-b3089a177000")
+	)
+	(junction
 		(at 185.42 100.33)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "127377aa-8424-4175-91b9-def1eaf40cbb")
-	)
-	(junction
-		(at 182.88 102.87)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "155e1c84-2b5a-4a79-8e1d-76adbff75cc0")
 	)
 	(junction
 		(at 163.83 92.71)
@@ -1589,23 +1589,13 @@
 	)
 	(wire
 		(pts
-			(xy 182.88 81.28) (xy 182.88 102.87)
+			(xy 160.02 72.39) (xy 168.91 72.39)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "3869b27e-ae9e-43c0-9f89-6515fee1e581")
-	)
-	(wire
-		(pts
-			(xy 182.88 72.39) (xy 182.88 76.2)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "444626f3-c189-412d-b7b8-04d1547ed680")
+		(uuid "32d75c75-7397-4349-88d8-67034e67f119")
 	)
 	(wire
 		(pts
@@ -1709,13 +1699,13 @@
 	)
 	(wire
 		(pts
-			(xy 185.42 72.39) (xy 185.42 88.9)
+			(xy 185.42 72.39) (xy 185.42 100.33)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "95ccc400-5e85-4079-bd97-5024a790e748")
+		(uuid "969d81b8-71e4-4834-98c1-a0dd2d4b0698")
 	)
 	(wire
 		(pts
@@ -1726,16 +1716,6 @@
 			(type default)
 		)
 		(uuid "a609bca4-e309-4947-9a70-c7c4319d8c14")
-	)
-	(wire
-		(pts
-			(xy 185.42 91.44) (xy 185.42 100.33)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b130803f-b733-4a7e-8544-578545b714c0")
 	)
 	(wire
 		(pts
@@ -1779,6 +1759,26 @@
 	)
 	(wire
 		(pts
+			(xy 157.48 72.39) (xy 157.48 74.93)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c8840c30-2bfa-456a-9669-b58b538bb13a")
+	)
+	(wire
+		(pts
+			(xy 173.99 72.39) (xy 182.88 72.39)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cce4e3bd-7ef8-4cb6-9162-2db4ec12b518")
+	)
+	(wire
+		(pts
 			(xy 163.83 92.71) (xy 166.37 92.71)
 		)
 		(stroke
@@ -1819,13 +1819,23 @@
 	)
 	(wire
 		(pts
-			(xy 189.23 91.44) (xy 185.42 91.44)
+			(xy 157.48 74.93) (xy 182.88 74.93)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "f8eef4c7-8826-419d-99c3-c79d047606a8")
+		(uuid "eda4c1de-aa40-4da1-925c-91a43c4fa2fa")
+	)
+	(wire
+		(pts
+			(xy 182.88 74.93) (xy 182.88 102.87)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fa166a34-3efc-4239-b4f7-db462ecd4aa6")
 	)
 	(wire
 		(pts
@@ -1836,16 +1846,6 @@
 			(type default)
 		)
 		(uuid "fb664997-1b14-4836-bbae-c281c9b0a763")
-	)
-	(wire
-		(pts
-			(xy 185.42 88.9) (xy 189.23 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "fcb9cf2d-2f5e-472c-a36d-8cfda1af26fd")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
@@ -1867,7 +1867,7 @@
 			)
 		)
 		(property "Value" "Conn_01x02"
-			(at 180.34 68.5799 90)
+			(at 179.07 62.992 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2256,7 +2256,8 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
-		(at 194.31 88.9 0)
+		(at 160.02 67.31 270)
+		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2264,7 +2265,7 @@
 		(dnp no)
 		(uuid "3b5f44f6-84ea-4a7a-8526-75acec6ede07")
 		(property "Reference" "J3"
-			(at 195.5801 93.98 90)
+			(at 154.94 66.0399 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2273,7 +2274,7 @@
 			)
 		)
 		(property "Value" "Conn_01x02"
-			(at 198.628 83.058 90)
+			(at 165.862 62.992 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2282,7 +2283,7 @@
 			)
 		)
 		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
-			(at 194.31 88.9 0)
+			(at 160.02 67.31 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2291,7 +2292,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 194.31 88.9 0)
+			(at 160.02 67.31 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2300,7 +2301,7 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 194.31 88.9 0)
+			(at 160.02 67.31 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2394,7 +2395,7 @@
 	)
 	(symbol
 		(lib_id "Device:Polyfuse_Small")
-		(at 182.88 78.74 0)
+		(at 171.45 72.39 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2403,25 +2404,23 @@
 		(fields_autoplaced yes)
 		(uuid "6f642d6e-eb18-40ec-b61d-da477fad892f")
 		(property "Reference" "F1"
-			(at 185.42 77.4699 0)
+			(at 171.45 66.04 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
 			)
 		)
 		(property "Value" "Polyfuse_Small"
-			(at 185.42 80.0099 0)
+			(at 171.45 68.58 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
 			)
 		)
-		(property "Footprint" "TestPoint:TestPoint_2Pads_Pitch2.54mm_Drill0.8mm"
-			(at 184.15 83.82 0)
+		(property "Footprint" "Capacitor_THT:C_Disc_D4.3mm_W1.9mm_P5.00mm"
+			(at 176.53 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2431,7 +2430,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 182.88 78.74 0)
+			(at 171.45 72.39 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2440,7 +2439,7 @@
 			)
 		)
 		(property "Description" "Resettable fuse, polymeric positive temperature coefficient, small symbol"
-			(at 182.88 78.74 0)
+			(at 171.45 72.39 0)
 			(effects
 				(font
 					(size 1.27 1.27)
