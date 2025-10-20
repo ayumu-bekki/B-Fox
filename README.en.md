@@ -1,4 +1,5 @@
 # BleRDF
+![BleRDF logo](./docs/logo.svg)
 
 ## Overview
 BleRDF is an open-source project that recreates and realizes the fun of amateur radio direction finding (Fox Hunting or ARDF) using Bluetooth Low Energy (BLE).
@@ -6,7 +7,7 @@ The goal is to lower the barriers to entry and participation, making it easy to 
 
 When starting this project, we felt that ARDF had the following challenges that made it not easily accessible:
 - High cost of transmitters and receivers
-- Requires a license for operation (beacon setup)
+- Requires a license for operating beacons
 - Cannot be used commercially as it uses amateur radio bands
 - Strict rules due to its competitive nature
 
@@ -21,22 +22,22 @@ We have created operation documentation (draft) with relaxed rules based on Park
 ## About Transmitters and Receivers
 
 Please refer to the [Transmitter/Receiver Device Documentation](./docs/README.md).
-This project includes a complete set of programs and data that can be output with PCB and 3D printers.
+This project includes a complete set of programs and data that can be fabricated with PCB manufacturing and 3D printing.
 
 ### Comparison
 
-| | ARDF | BleRDF |
-| ---- | ---- | ---- |
-| Transmitter/Receiver Cost | Tens of thousands of yen | Thousands of yen |
-| Qualification | Third-class amateur radio operator or higher required for receiver installation | Not required |
-| Radio Station License | Required | Not required |
-| Receiver | Dedicated or compatible receiver required | Smartphones possible |
-| Detection Method | Auditory (sound) | Visual (numerical value) |
-| Competitiveness | Established as a competition with world championships | Recreation |
-| DIY Receiver Antenna | Possible | Generally not possible |
-| Frequency Used | 3.5MHz / 144MHz | 2.4GHz |
-| Antenna Output Power | 3.5MHz(3-5W) / 144MHz(0.25-1.5W) approx. | 0.06-8mW |
-| Activity Range | Several kilometers | Several hundred meters |
+|                           | ARDF                                                                          | BleRDF                     |
+| ------------------------- | ----------------------------------------------------------------------------- | -------------------------- |
+| Transmitter/Receiver Cost | $200-700                                                                      | $20-70                     |
+| Qualification             | Third-class amateur radio operator or higher required for beacon setup        | Not required               |
+| Radio Station License     | Required                                                                      | Not required               |
+| Receiver                  | Dedicated receiver required                                                   | Smartphones possible       |
+| Detection Method          | Auditory (sound)                                                              | Visual (numerical value)   |
+| Competitiveness           | Established as a competition with world championships                         | Recreation                 |
+| DIY Receiver Antenna      | Possible                                                                      | Generally not possible     |
+| Frequency Used            | 3.5MHz / 144MHz                                                               | 2.4GHz                     |
+| Antenna Output Power      | 3.5MHz(3-5W) / 144MHz(0.25-1.5W) approx.                                      | 0.06-8mW                   |
+| Activity Range            | Several kilometers                                                            | Several hundred meters     |
 
 ## Repository Contents
 Contains transmitter/receiver programs, mechanical design, and operation methods.
@@ -48,4 +49,4 @@ Contains transmitter/receiver programs, mechanical design, and operation methods
 - docs
   - Technical documentation, PCB, Case (for 3D printer)
 - operation
-  - Operations kit
+  - Operation guidelines and documentation
