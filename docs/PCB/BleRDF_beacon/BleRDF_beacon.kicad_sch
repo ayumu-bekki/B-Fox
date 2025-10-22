@@ -1619,6 +1619,16 @@
 	)
 	(wire
 		(pts
+			(xy 160.02 88.9) (xy 160.02 105.41)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "469a0604-35be-4772-ac53-c6f608404386")
+	)
+	(wire
+		(pts
 			(xy 170.18 100.33) (xy 170.18 102.87)
 		)
 		(stroke
@@ -1736,16 +1746,6 @@
 			(type default)
 		)
 		(uuid "c436fca2-80e3-4c00-85c7-5764effd0229")
-	)
-	(wire
-		(pts
-			(xy 160.02 88.9) (xy 160.02 105.41)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c4cb28f8-2162-43b4-bc70-7e77490d9514")
 	)
 	(wire
 		(pts
@@ -2122,7 +2122,8 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
-		(at 165.1 105.41 0)
+		(at 165.1 107.95 0)
+		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -2130,7 +2131,7 @@
 		(dnp no)
 		(uuid "235ab1be-50ed-4efb-98f9-e691f4f182bf")
 		(property "Reference" "J4"
-			(at 166.3701 110.49 90)
+			(at 166.3701 102.87 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2139,7 +2140,7 @@
 			)
 		)
 		(property "Value" "Conn_01x02"
-			(at 168.402 95.25 90)
+			(at 168.402 118.11 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2148,7 +2149,7 @@
 			)
 		)
 		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
-			(at 165.1 105.41 0)
+			(at 165.1 107.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2157,7 +2158,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 165.1 105.41 0)
+			(at 165.1 107.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2166,7 +2167,7 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 165.1 105.41 0)
+			(at 165.1 107.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2351,7 +2352,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Resistor_THT:R_Axial_DIN0204_L3.6mm_D1.6mm_P7.62mm_Horizontal"
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal"
 			(at 156.21 109.728 90)
 			(effects
 				(font
