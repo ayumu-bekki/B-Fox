@@ -1,6 +1,6 @@
-# bfox Operation & Rules Draft
+# B-Fox Operation & Rules Draft
 
-bfox is an easy-to-enjoy outdoor game, an adaptation of traditional ARDF (Amateur Radio Direction Finding), using Bluetooth iBeacons for a "treasure hunt" style experience.
+B-Fox is an easy-to-enjoy outdoor game, an adaptation of traditional ARDF (Amateur Radio Direction Finding), using Bluetooth iBeacons for a "treasure hunt" style experience.
 
 ## 1. Required Equipment
 

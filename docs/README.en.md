@@ -1,6 +1,6 @@
-# bfox Project Technical Information Overview
+# B-Fox Project Technical Information Overview
 
-bfox is an open-source project that recreates and realizes the fun of amateur radio direction finding (ARDF) using Bluetooth Low Energy (BLE).
+B-Fox is an open-source project that recreates and realizes the fun of amateur radio direction finding (ARDF) using Bluetooth Low Energy (BLE).
 
 ---
 
