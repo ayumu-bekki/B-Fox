@@ -1,6 +1,6 @@
-# BleRDF Project Technical Information Overview
+# bfox Project Technical Information Overview
 
-BleRDF is an open-source project that recreates and realizes the fun of amateur radio direction finding (ARDF) using Bluetooth Low Energy (BLE).
+bfox is an open-source project that recreates and realizes the fun of amateur radio direction finding (ARDF) using Bluetooth Low Energy (BLE).
 
 ---
 
@@ -58,32 +58,32 @@ List of main parts required for reference implementation
 
 ### Transmitter
 
-| Item | Notes | Quantity |
-| --- | --- | --- |
-| Seeed Studio XIAO ESP32C6 |  | 1 |
-| LiPo Battery 3000mAh | | 1 |
+| Item                      | Notes | Quantity |
+| ------------------------- | ----- | -------- |
+| Seeed Studio XIAO ESP32C6 |       | 1        |
+| LiPo Battery 3000mAh      |       | 1        |
 
 ### Receiver
 
-| Item | Notes | Quantity |
-| --- | --- | --- |
-| Seeed Studio XIAO ESP32C6 |  | 1 |
-| Receiver PCB |  | 1 |
-| Receiver Case Board |  | 1 |
-| LCD Module AQM1602Y-RN-GBW | | 1 |
-| Rod Antenna for XIAO | https://akizukidenshi.com/catalog/g/g117582/ | 1 |
-| LiPo Battery 500mAh | | 1 |
-| Resistor | 220kΩ | 2 |
-|  | 1kΩ| 2 |
-| XH Connector | 2P Vertical | 2 |
-| Cable with XH Connector | 2P (for ESP32C6 battery connection) | 1 |
-| | 2P Horizontal | 1 |
-| Capacitor | | |
-| Slide Switch | For PCB mount | 1 |
-| Tactile Switch | For PCB mount | 1 |
-| Polyswitch | 250mA | 1 |
-| Split Long Pin Socket | 9pin | 1 |
-| | 7pin (Low Profile) | 2 |
-| Screw | | |
-| Spacer | | |
-| Wiring Cord | | Appropriate amount |
+| Item                       | Notes                                        | Quantity           |
+| -------------------------- | -------------------------------------------- | ------------------ |
+| Seeed Studio XIAO ESP32C6  |                                              | 1                  |
+| Receiver PCB               |                                              | 1                  |
+| Receiver Case Board        |                                              | 1                  |
+| LCD Module AQM1602Y-RN-GBW |                                              | 1                  |
+| Rod Antenna for XIAO       | https://akizukidenshi.com/catalog/g/g117582/ | 1                  |
+| LiPo Battery 500mAh        |                                              | 1                  |
+| Resistor                   | 220kΩ                                        | 2                  |
+|                            | 1kΩ                                          | 2                  |
+| XH Connector               | 2P Vertical                                  | 2                  |
+| Cable with XH Connector    | 2P (for ESP32C6 battery connection)          | 1                  |
+|                            | 2P Horizontal                                | 1                  |
+| Capacitor                  |                                              |                    |
+| Slide Switch               | For PCB mount                                | 1                  |
+| Tactile Switch             | For PCB mount                                | 1                  |
+| Polyswitch                 | 250mA                                        | 1                  |
+| Split Long Pin Socket      | 9pin                                         | 1                  |
+|                            | 7pin (Low Profile)                           | 2                  |
+| Screw                      |                                              |                    |
+| Spacer                     |                                              |                    |
+| Wiring Cord                |                                              | Appropriate amount |

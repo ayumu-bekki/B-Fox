@@ -1,16 +1,16 @@
-# BleRDF Operation & Rules Draft
+# bfox Operation & Rules Draft
 
-BleRDF is an easy-to-enjoy outdoor game, an adaptation of traditional ARDF (Amateur Radio Direction Finding), using Bluetooth iBeacons for a "treasure hunt" style experience.
+bfox is an easy-to-enjoy outdoor game, an adaptation of traditional ARDF (Amateur Radio Direction Finding), using Bluetooth iBeacons for a "treasure hunt" style experience.
 
 ## 1. Required Equipment
 
-| Role | Equipment | Notes |
-| ---- | ---- | ---- |
-| Player | 1. Receiver | Use a dedicated receiver or a smartphone with a BLE scanning app. |
-| | 2. Record Card | For recording proof of discovery (stamps or stickers). Not required if using QR codes for recording. |
-| Organizer | 1. Beacons | At least 3-5. Ensure they are powered on. |
-| | 2. Recording Tools | Stamps/stickers, or QR code placements for recording. |
-| | 3. Area Map | A simple map showing the search area. Mark the start position and boundaries. |
+| Role      | Equipment          | Notes                                                                                                |
+| --------- | ------------------ | ---------------------------------------------------------------------------------------------------- |
+| Player    | 1. Receiver        | Use a dedicated receiver or a smartphone with a BLE scanning app.                                    |
+|           | 2. Record Card     | For recording proof of discovery (stamps or stickers). Not required if using QR codes for recording. |
+| Organizer | 1. Beacons         | At least 3-5. Ensure they are powered on.                                                            |
+|           | 2. Recording Tools | Stamps/stickers, or QR code placements for recording.                                                |
+|           | 3. Area Map        | A simple map showing the search area. Mark the start position and boundaries.                        |
 
 ## 2. Preparation and Setup (for Organizers)
 

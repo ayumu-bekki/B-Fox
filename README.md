@@ -1,10 +1,10 @@
-# BleRDF
-![BleRDF logo](./docs/logo.svg)
+# B-Fox
+![B-Fox logo](./docs/logo.svg)
 
 [English documentation is available here](./README.en.md)
 
 ## 概要
-BleRDFは、Bluetooth Low Energy (BLE) を利用し、アマチュア無線方向探知 (FoxハンティングやARDF) の遊びを再現・実現するためのオープンソースプロジェクトです。
+B-Fox は、Bluetooth Low Energy (BLE) を利用し、アマチュア無線方向探知 (FoxハンティングやARDF) の遊びを再現・実現するためのオープンソースプロジェクトです。
 導入・参加の障壁を下げ、「電波の強弱で隠し場所を探す」という無線方向探索のコアな楽しさを手軽に実現することを目指しています。
 
 このプロジェクトを始めるにあたり、ARDFに以下のような課題があり手軽でないと感じていました。
@@ -19,7 +19,7 @@ BleRDFは、Bluetooth Low Energy (BLE) を利用し、アマチュア無線方�
 ## 運用について
 
 基本遊びだが発展としてARDF競技があるという位置付けを想定し、パークARDFを参考にルールを緩くする方向で運用資料(草案)を作成しました。
-[BleRDF 運用・ルール案](./operation/OPERATION.md)
+[B-Fox 運用・ルール案](./operation/OPERATION.md)
 
 ## 送信機・受信機について
 
@@ -28,7 +28,7 @@ BleRDFは、Bluetooth Low Energy (BLE) を利用し、アマチュア無線方�
 
 ### 比較
  
-|                    | ARDF                                          | BleRDF                     |
+|                    | ARDF                                          | B-Fox                      |
 | ------------------ | --------------------------------------------- | -------------------------- |
 | 送信受信機の費用   | 数万円                                        | 数千円                     |
 | 資格               | 受信機設置に第3級アマチュア無線技士以上が必要 | 不要                       |
@@ -44,9 +44,9 @@ BleRDFは、Bluetooth Low Energy (BLE) を利用し、アマチュア無線方�
 ## リポジトリ内容説明
 送信機・受信機のプログラムと機械設計・運用方法が含まれています。
 
-- blerdf_receiver
+- bfox_receiver
   - 受信機プログラム一式
-- blerdf_beacon
+- bfox_beacon
   - 送信機プログラム一式
 - docs
   - 技術資料・PCB・ケース(3Dプリンタ用)

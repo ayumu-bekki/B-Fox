@@ -1,0 +1,14 @@
+#ifndef BFOX_RECEIVER_MAIN_VERSION_H_
+#define BFOX__RECEIVER_MAIN_VERSION_H_
+// ESP32 B-Fox Receiver
+// (C)2025 bekki.jp
+
+#include <string>
+
+namespace bfox_receiver_system {
+
+constexpr std::string_view kGitVersion = "@GIT_VERSION@";
+
+}  // namespace bfox_receiver_system
+
+#endif  // BFOX_RECEIVER_MAIN_VERSION_H_

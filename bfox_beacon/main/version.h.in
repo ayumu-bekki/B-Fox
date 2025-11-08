@@ -1,0 +1,14 @@
+#ifndef BFOX_BEACON_MAIN_VERSION_H_
+#define BFOX__BEACON_MAIN_VERSION_H_
+// ESP32 B-Fox Beacon
+// (C)2025 bekki.jp
+
+#include <string>
+
+namespace bfox_beacon_system {
+
+constexpr std::string_view kGitVersion = "@GIT_VERSION@";
+
+}  // namespace bfox_beacon_system
+
+#endif  // BFOX_BEACON_MAIN_VERSION_H_

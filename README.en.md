@@ -1,8 +1,8 @@
-# BleRDF
-![BleRDF logo](./docs/logo.svg)
+# B-Fox
+![B-Fox logo](./docs/logo.svg)
 
 ## Overview
-BleRDF is an open-source project that recreates and realizes the fun of amateur radio direction finding (Fox Hunting or ARDF) using Bluetooth Low Energy (BLE).
+B-Fox is an open-source project that recreates and realizes the fun of amateur radio direction finding (Fox Hunting or ARDF) using Bluetooth Low Energy (BLE).
 The goal is to lower the barriers to entry and participation, making it easy to realize the core enjoyment of radio direction finding: "finding hidden locations by radio signal strength."
 
 When starting this project, we felt that ARDF had the following challenges that made it not easily accessible:
@@ -17,7 +17,7 @@ The protocol uses iBeacon (BLE), so you can play even without a dedicated receiv
 ## About Operations
 
 We have created operation documentation (draft) with relaxed rules based on Park ARDF, assuming that this is basically recreation with potential development into ARDF competitions.
-[BleRDF Operations & Rules Draft](./operation/OPERATION.md)
+[B-Fox Operations & Rules Draft](./operation/OPERATION.md)
 
 ## About Transmitters and Receivers
 
@@ -26,25 +26,25 @@ This project includes a complete set of programs and data that can be fabricated
 
 ### Comparison
 
-|                           | ARDF                                                                          | BleRDF                     |
-| ------------------------- | ----------------------------------------------------------------------------- | -------------------------- |
-| Transmitter/Receiver Cost | $200-700                                                                      | $20-70                     |
-| Qualification             | Third-class amateur radio operator or higher required for beacon setup        | Not required               |
-| Radio Station License     | Required                                                                      | Not required               |
-| Receiver                  | Dedicated receiver required                                                   | Smartphones possible       |
-| Detection Method          | Auditory (sound)                                                              | Visual (numerical value)   |
-| Competitiveness           | Established as a competition with world championships                         | Recreation                 |
-| DIY Receiver Antenna      | Possible                                                                      | Generally not possible     |
-| Frequency Used            | 3.5MHz / 144MHz                                                               | 2.4GHz                     |
-| Antenna Output Power      | 3.5MHz(3-5W) / 144MHz(0.25-1.5W) approx.                                      | 0.06-8mW                   |
-| Activity Range            | Several kilometers                                                            | Several hundred meters     |
+|                           | ARDF                                                                   | B-Fox                    |
+| ------------------------- | ---------------------------------------------------------------------- | ------------------------ |
+| Transmitter/Receiver Cost | $200-700                                                               | $20-70                   |
+| Qualification             | Third-class amateur radio operator or higher required for beacon setup | Not required             |
+| Radio Station License     | Required                                                               | Not required             |
+| Receiver                  | Dedicated receiver required                                            | Smartphones possible     |
+| Detection Method          | Auditory (sound)                                                       | Visual (numerical value) |
+| Competitiveness           | Established as a competition with world championships                  | Recreation               |
+| DIY Receiver Antenna      | Possible                                                               | Generally not possible   |
+| Frequency Used            | 3.5MHz / 144MHz                                                        | 2.4GHz                   |
+| Antenna Output Power      | 3.5MHz(3-5W) / 144MHz(0.25-1.5W) approx.                               | 0.06-8mW                 |
+| Activity Range            | Several kilometers                                                     | Several hundred meters   |
 
 ## Repository Contents
 Contains transmitter/receiver programs, mechanical design, and operation methods.
 
-- blerdf_receiver
+- bfox_receiver
   - Receiver program suite
-- blerdf_beacon
+- bfox_beacon
   - Transmitter program suite
 - docs
   - Technical documentation, PCB, Case (for 3D printer)
