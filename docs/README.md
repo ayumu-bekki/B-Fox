@@ -1,6 +1,6 @@
 # B-Foxプロジェクト 技術情報概要
 
-B-Foxは、Bluetooth Low Energy (BLE) を利用し、アマチュア無線方向探知 (ARDF) の遊びを再現・実現するためのオープンソースプロジェクトです。
+B-Foxは、Bluetooth Low Energy (BLE) を利用し、FOXハンティングの遊びを再現・実現するためのオープンソースプロジェクトです。
 
 ---
 

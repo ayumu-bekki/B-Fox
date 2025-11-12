@@ -28,10 +28,9 @@ This project includes a complete set of programs and data that can be fabricated
 
 |                           | ARDF                                                                   | B-Fox              |
 | ------------------------- | ---------------------------------------------------------------------- | ------------------ |
-| Transmitter/Receiver Cost | $200-700                                                               | $20-70             |
+| Receiver                  | Dedicated or AM receiver required                                      | Smartphones work   |
 | Qualification             | Third-class amateur radio operator or higher required for beacon setup | Not required       |
 | Radio Station License     | Required                                                               | Not required       |
-| Receiver                  | Dedicated receiver required                                            | Smartphones work   |
 | Detection Method          | Sound, S-meter                                                         | dBm value          |
 | Competitiveness           | Established as a competition with world championships                  | Recreation         |
 | DIY Receiver Antenna      | Possible                                                               | Generally not      |
