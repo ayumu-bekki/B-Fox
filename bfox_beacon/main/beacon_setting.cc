@@ -16,7 +16,7 @@ constexpr const char kSettingFileName[] = "beacon_setting.json";
 
 BeaconSetting::BeaconSetting()
     : is_active_(false),
-      device_name_("bfox Beacon"),
+      device_name_("B-Fox Beacon"),
       major_(0),
       minor_(0),
       measured_power_(-59),
