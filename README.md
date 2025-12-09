@@ -3,6 +3,9 @@
 # B-Fox
 ![B-Fox logo](./docs/logo.svg)
 
+# B-Fox Beacon Control Panel
+https://ayumu-bekki.github.io/B-Fox/bfox_beacon/web_client/
+
 ## 概要
 B-Fox は、Bluetooth Low Energy (BLE) を利用し、Foxハンティングの遊びを再現・実現するためのオープンソースプロジェクトです。
 導入・参加の障壁を下げ、「電波の強弱で隠し場所を探す」という無線方向探索のコアな楽しさを手軽に実現することを目指しています。

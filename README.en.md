@@ -3,6 +3,9 @@
 # B-Fox
 ![B-Fox logo](./docs/logo.svg)
 
+# B-Fox Beacon Control Panel
+https://ayumu-bekki.github.io/B-Fox/bfox_beacon/web_client/
+
 ## Overview
 B-Fox is an open-source project that recreates and realizes the fun of Fox Hunting using Bluetooth Low Energy (BLE).
 The goal is to lower the barriers to entry and participation, making it easy to realize the core enjoyment of radio direction finding: "finding hidden locations by radio signal strength."
