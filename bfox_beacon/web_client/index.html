@@ -11,6 +11,7 @@
     let ble = new BlueJelly();
     ble.setUUID("BFoxBeaconSetting", "347fd67c-9131-4ea0-b0a7-1886d8c0f0df", "096a09d5-1b35-4c99-a483-8d0c34f70220");
     ble.setUUID("BFoxBeaconBatteryVoltageChar", "347fd67c-9131-4ea0-b0a7-1886d8c0f0df", "53bf4a46-41ba-46a3-b675-4fb7f0770905");
+    ble.setUUID("BFoxBeaconDeepSleep", "347fd67c-9131-4ea0-b0a7-1886d8c0f0df", "0cf26a7e-650e-4c18-9a30-bbbca50d88c1");
 
     ble.onConnectGATT = function (uuid) {
       console.log('> connected GATT');
@@ -102,6 +103,16 @@
 
         ble.write('BFoxBeaconSetting', new Uint8Array(buffer));
       });
+
+      document.getElementById('deep_sleep').addEventListener('click', function () {
+        if (confirm("Device will enter Deep Sleep mode.\nPower OFF/ON to wake up.\nContinue?")) {
+          var buffer = new ArrayBuffer(1);
+          var view = new DataView(buffer);
+          view.setUint8(0, 0x01);
+          ble.write('BFoxBeaconDeepSleep', new Uint8Array(buffer));
+          alert("Deep Sleep command sent.\nDevice will sleep shortly.");
+        }
+      });
     };
   </script>
 </head>
@@ -124,6 +135,12 @@
       <div id="control_panel" style="display: none;">
         <h2 class="sub_title">Battery Voltage</h2>
         <p id="battery_voltage">0.0V</p>
+
+        <hr>
+
+        <h2 class="sub_title">Power Management</h2>
+        <p>Put device into Deep Sleep mode for charging.</p>
+        <p><button id="deep_sleep" class="button">Enter Deep Sleep Mode</button></p>
 
         <hr>
 
