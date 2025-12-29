@@ -29,9 +29,6 @@ namespace bfox_beacon_system {
 
 // kA0 Input Enable
 
-// Monitoring LED Pin GPIO
-constexpr gpio_num_t kMonitoringLedPin = xiao_esp32c6_pin::kD7;
-
 // Unused GPIO Pins
 const gpio_num_t kUnusedGpioPins[] = {
     xiao_esp32c6_pin::kD1,   xiao_esp32c6_pin::kD2,
@@ -165,6 +162,22 @@ void BFoxBeacon::CreateBLEService() {
           beacon_setting_characteristic_uuid, beacon_setting_char_property,
           weak_from_this());
 
+  // Create BleDeepSleepCharacteristic : 0cf26a7e-650e-4c18-9a30-bbbca50d88c1
+  constexpr esp_gatt_char_prop_t deep_sleep_char_property =
+      ESP_GATT_CHAR_PROP_BIT_WRITE;
+  constexpr uint8_t kDeepSleepCharacteristicUuidRaw[ESP_UUID_LEN_128] = {
+      // 128bit Little Endian
+      0xC1, 0x88, 0x0D, 0xA5, 0xBC, 0xBB, 0x30, 0x9A,
+      0x18, 0x4C, 0x0E, 0x65, 0x7E, 0x6A, 0xF2, 0x0C};
+  esp_bt_uuid_t deep_sleep_characteristic_uuid = {.len = ESP_UUID_LEN_128,
+                                                  .uuid = {.uuid128 = {}}};
+  std::memcpy(deep_sleep_characteristic_uuid.uuid.uuid128,
+              kDeepSleepCharacteristicUuidRaw, ESP_UUID_LEN_128);
+  BleCharacteristicInterfaceSharedPtr ble_deep_sleep_characteristic =
+      std::make_shared<BleDeepSleepCharacteristic>(
+          deep_sleep_characteristic_uuid, deep_sleep_char_property,
+          weak_from_this());
+
   // Create BleBFoxService 347fd67c-9131-4ea0-b0a7-1886d8c0f0df
   constexpr uint8_t kServiceUuidRaw[ESP_UUID_LEN_128] = {
       // 128bit Little Endian
@@ -175,9 +188,10 @@ void BFoxBeacon::CreateBLEService() {
                                 .uuid = {.uuid128 = {}}};
   std::memcpy(service_uuid.uuid.uuid128, kServiceUuidRaw, ESP_UUID_LEN_128);
   BleServiceInterfaceSharedPtr ble_BFOX_service =
-      std::make_shared<BleBFoxService>(0, service_uuid, 8);
+      std::make_shared<BleBFoxService>(0, service_uuid, 10);
   ble_BFOX_service->AddCharacteristic(ble_voltage_characteristic);
   ble_BFOX_service->AddCharacteristic(ble_beacon_setting_characteristic);
+  ble_BFOX_service->AddCharacteristic(ble_deep_sleep_characteristic);
 
   // create iBeacon Adv data
   BleIBeacon ibeacon_adv_data =

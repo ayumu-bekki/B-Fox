@@ -3,6 +3,7 @@
 
 #include "ble_services.h"
 
+#include <esp_sleep.h>
 #include <esp_system.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -11,10 +12,15 @@
 #include <cstring>
 
 #include "beacon_setting.h"
+#include "bfox_beacon.h"
+#include "gpio_control.h"
 #include "logger.h"
 #include "util.h"
 
 namespace bfox_beacon_system {
+
+// Deep Sleep command code
+constexpr uint8_t kDeepSleepCommand = 0x01;
 
 BleVoltageCharacteristic::BleVoltageCharacteristic(
     esp_bt_uuid_t characteristic_uuid, esp_gatt_char_prop_t property,
@@ -153,6 +159,48 @@ esp_bt_uuid_t BleBeaconSettingCharacteristic::GetUuid() const {
 }
 
 esp_gatt_char_prop_t BleBeaconSettingCharacteristic::GetProperty() const {
+  return property_;
+}
+
+BleDeepSleepCharacteristic::BleDeepSleepCharacteristic(
+    esp_bt_uuid_t characteristic_uuid, esp_gatt_char_prop_t property,
+    const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface)
+    : BleCharacteristicInterface(),
+      characteristic_uuid_(characteristic_uuid),
+      property_(property),
+      bfox_beacon_interface_(bfox_beacon_interface) {}
+
+void BleDeepSleepCharacteristic::Write(const std::vector<uint8_t>* const data) {
+  if (data->size() <= 0) {
+    return;
+  }
+
+  // Check for Deep Sleep command
+  const uint8_t command = *data->data();
+  if (command == kDeepSleepCommand) {
+    ESP_LOGI(TAG, "Deep Sleep command received. Entering Deep Sleep mode...");
+
+    // Turn off monitoring LED before entering Deep Sleep
+    gpio::SetLevel(kMonitoringLedPin, false);
+
+    // Enter Deep Sleep immediately
+    esp_deep_sleep_start();
+  } else {
+    ESP_LOGW(TAG, "Unknown Deep Sleep command: 0x%02x", command);
+  }
+}
+
+void BleDeepSleepCharacteristic::SetHandle(const uint16_t handle) {
+  handle_ = handle;
+}
+
+uint16_t BleDeepSleepCharacteristic::GetHandle() const { return handle_; }
+
+esp_bt_uuid_t BleDeepSleepCharacteristic::GetUuid() const {
+  return characteristic_uuid_;
+}
+
+esp_gatt_char_prop_t BleDeepSleepCharacteristic::GetProperty() const {
   return property_;
 }
 

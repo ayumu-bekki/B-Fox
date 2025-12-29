@@ -59,6 +59,27 @@ class BleBeaconSettingCharacteristic final : public BleCharacteristicInterface {
   const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface_;
 };
 
+class BleDeepSleepCharacteristic final : public BleCharacteristicInterface {
+ public:
+  BleDeepSleepCharacteristic(
+      esp_bt_uuid_t characteristic_uuid, esp_gatt_char_prop_t property,
+      const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface);
+
+  void Write(const std::vector<uint8_t>* const data) override;
+  void Read(std::vector<uint8_t>* const data) override {};
+
+  void SetHandle(const uint16_t handle) override;
+  uint16_t GetHandle() const override;
+  esp_bt_uuid_t GetUuid() const override;
+  esp_gatt_char_prop_t GetProperty() const override;
+
+ private:
+  const esp_bt_uuid_t characteristic_uuid_;
+  const esp_gatt_char_prop_t property_;
+  uint16_t handle_;
+  const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface_;
+};
+
 class BleBFoxService final : public BleServiceInterface {
  public:
   BleBFoxService(const uint16_t app_id, esp_bt_uuid_t service_uuid,
