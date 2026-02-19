@@ -29,7 +29,7 @@ This project includes a complete set of programs and data that can be fabricated
 Since the protocol uses iBeacon (BLE), you can play by installing apps like LightBlue (https://punchthrough.com/lightblue/).
 
 A dedicated receiver app for iOS is also available.
-![B-Fox Receiver for iOS](.docs/ios_app.png)
+![B-Fox Receiver for iOS](./docs/ios_app.png)
 
 ### Comparison
 

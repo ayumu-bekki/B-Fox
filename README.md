@@ -29,7 +29,7 @@ B-Fox は、Bluetooth Low Energy (BLE) を利用し、Foxハンティングの�
 プロトコルにiBeacon (BLE)を利用しているため、LightBlue (https://punchthrough.com/lightblue/) などをインストールすれば遊ぶことができます。
 
 また、iOS向けに専用受信アプリを用意しています。
-![B-Fox Receiver for iOS](.docs/ios_app.png)
+![B-Fox Receiver for iOS](./docs/ios_app.png)
 
 ### 比較
  
