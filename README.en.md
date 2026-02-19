@@ -17,7 +17,6 @@ When starting this project, we felt that existing Fox Hunting and ARDF had the f
 - ARDF has strict rules due to its competitive nature
 
 Therefore, we are realizing an easily accessible radio direction finding activity using BLE, which anyone can use without a license.
-The protocol uses iBeacon (BLE), so you can play even without a dedicated receiver by installing apps like LightBlue (https://punchthrough.com/lightblue/) on smartphones.
 
 ## About Operations
 We have created operation documentation (draft) with relaxed rules based on Park ARDF, assuming that this is basically recreation with potential development into ARDF competitions.
@@ -26,6 +25,11 @@ We have created operation documentation (draft) with relaxed rules based on Park
 ## About Transmitters and Receivers
 Please refer to the [Transmitter/Receiver Device Documentation](./docs/README.md).
 This project includes a complete set of programs and data that can be fabricated with PCB manufacturing and 3D printing.
+
+Since the protocol uses iBeacon (BLE), you can play by installing apps like LightBlue (https://punchthrough.com/lightblue/).
+
+A dedicated receiver app for iOS is also available.
+![B-Fox Receiver for iOS](.docs/ios_app.png)
 
 ### Comparison
 

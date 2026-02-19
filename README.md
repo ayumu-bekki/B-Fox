@@ -17,7 +17,6 @@ B-Fox は、Bluetooth Low Energy (BLE) を利用し、Foxハンティングの�
 - ARDFは競技のため厳格なルールがある
 
 そこで、誰でも免許なしに利用できるBLEを利用して手軽に遊べる無線方向探索の遊びを実現します。
-プロトコルにはiBeacon (BLE)を利用しているため、専用受信機が無くてもスマートフォンで LightBlue (https://punchthrough.com/lightblue/) などをインストールすれば遊ぶことができます。
 
 ## 運用について
 基本遊びだが発展としてARDF競技があるという位置付けを想定し、パークARDFを参考にルールを緩くする方向で運用資料(草案)を作成しました。
@@ -26,6 +25,11 @@ B-Fox は、Bluetooth Low Energy (BLE) を利用し、Foxハンティングの�
 ## 送信機・受信機について
 [送受信機デバイスドキュメント](./docs/README.md) を参考にしてください。
 このプロジェクトには、プログラム一式と、PCB・3Dプリンタで出力できるデータが含まれています。
+
+プロトコルにiBeacon (BLE)を利用しているため、LightBlue (https://punchthrough.com/lightblue/) などをインストールすれば遊ぶことができます。
+
+また、iOS向けに専用受信アプリを用意しています。
+![B-Fox Receiver for iOS](.docs/ios_app.png)
 
 ### 比較
  
