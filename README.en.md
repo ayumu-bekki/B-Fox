@@ -48,6 +48,8 @@ Contains transmitter/receiver programs, mechanical design, and operation methods
   - Receiver program suite
 - bfox_beacon
   - Transmitter program suite
+- BFoxReceiverForIOS
+  - iOS receiver app
 - docs
   - Technical documentation, PCB, Case (for 3D printer)
 - operation

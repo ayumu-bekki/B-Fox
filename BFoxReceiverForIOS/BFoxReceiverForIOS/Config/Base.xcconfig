@@ -1,0 +1,11 @@
+// Base.xcconfig
+// 共通ビルド設定（git 管理対象）
+//
+// 個人設定（DEVELOPMENT_TEAM 等）は Local.xcconfig に記載してください。
+// Local.xcconfig は .gitignore で除外されています。
+
+#include "Local.xcconfig"
+
+PRODUCT_BUNDLE_IDENTIFIER = jp.bekki.bfox.receiver
+PRODUCT_NAME = B-Fox
+SWIFT_VERSION = 5.0

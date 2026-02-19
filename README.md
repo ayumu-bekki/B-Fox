@@ -48,6 +48,8 @@ B-Fox は、Bluetooth Low Energy (BLE) を利用し、Foxハンティングの�
   - 受信機プログラム一式
 - bfox_beacon
   - 送信機プログラム一式
+- BFoxReceiverForIOS
+  - iOS向け受信用アプリ
 - docs
   - 技術資料・PCB・ケース(3Dプリンタ用)
 - operation
