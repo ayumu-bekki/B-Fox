@@ -19,6 +19,7 @@ final class BeaconScanner: NSObject, ObservableObject {
 
     private let locationManager = CLLocationManager()
     private var currentMajor: Int = Constants.defaultMajor
+    private var currentUUID: UUID = Constants.beaconUUID
     private let beaconTimeoutInterval: TimeInterval = 2.0
     private var timeoutTimer: Timer?
 
@@ -32,8 +33,9 @@ final class BeaconScanner: NSObject, ObservableObject {
 
     // MARK: - Public API
 
-    func startScanning(major: Int) {
+    func startScanning(major: Int, uuid: UUID = Constants.beaconUUID) {
         currentMajor = major
+        currentUUID = uuid
 
         switch locationManager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
@@ -56,11 +58,20 @@ final class BeaconScanner: NSObject, ObservableObject {
         if wasScanning { beginRanging() }
     }
 
+    func updateBeaconTarget(uuid: UUID, major: Int) {
+        let wasScanning = isScanning
+        if wasScanning { stopRanging() }
+        currentUUID = uuid
+        currentMajor = major
+        beacons = []
+        if wasScanning { beginRanging() }
+    }
+
     // MARK: - Private Helpers
 
     private func beginRanging() {
         let constraint = CLBeaconIdentityConstraint(
-            uuid: Constants.beaconUUID,
+            uuid: currentUUID,
             major: CLBeaconMajorValue(currentMajor)
         )
         locationManager.startRangingBeacons(satisfying: constraint)
@@ -70,7 +81,7 @@ final class BeaconScanner: NSObject, ObservableObject {
 
     private func stopRanging() {
         let constraint = CLBeaconIdentityConstraint(
-            uuid: Constants.beaconUUID,
+            uuid: currentUUID,
             major: CLBeaconMajorValue(currentMajor)
         )
         locationManager.stopRangingBeacons(satisfying: constraint)

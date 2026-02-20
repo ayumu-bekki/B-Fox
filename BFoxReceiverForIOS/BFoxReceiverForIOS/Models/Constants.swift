@@ -13,9 +13,11 @@ enum Constants {
     // AppStorage keys
     static let majorKey = "beacon_major"
     static let showRSSIKey = "show_rssi"
+    static let uuidKey = "beacon_uuid"
 
     // Default values
     static let defaultMajor = 0
+    static let defaultBFoxProximityUUID = "C65B2C5D-9E53-46EC-8B8E-54D9E2F21188"
 
     // Radar display
     static let radarZoneCount = 3       // Number of concentric circles

@@ -5,8 +5,13 @@ import SwiftUI
 
 struct SettingsView: View {
 
-    @AppStorage(Constants.majorKey)   private var major: Int  = Constants.defaultMajor
+    @AppStorage(Constants.majorKey)    private var major: Int    = Constants.defaultMajor
+    @AppStorage(Constants.uuidKey)     private var uuidString: String = Constants.defaultBFoxProximityUUID
     @AppStorage(Constants.showRSSIKey) private var showRSSI: Bool = false
+
+    /// TextField の編集中バッファ。フォーカスが外れたときにバリデートして uuidString へ書き込む。
+    @State private var uuidDraft: String = ""
+    @State private var uuidError: Bool = false
 
     private let majorValues = Array(0...9)
 
@@ -42,6 +47,41 @@ struct SettingsView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+
+                    // UUID 入力フィールド
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text(String(localized: "settings.uuid.label"))
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            if uuidString != Constants.defaultBFoxProximityUUID {
+                                Button {
+                                    uuidDraft = Constants.defaultBFoxProximityUUID
+                                    commitUUID()
+                                } label: {
+                                    Label(String(localized: "settings.uuid.reset"), systemImage: "arrow.counterclockwise")
+                                        .font(.caption)
+                                }
+                                .buttonStyle(.borderless)
+                            }
+                        }
+                        TextField(String(localized: "settings.uuid.placeholder"), text: $uuidDraft)
+                            .font(.system(size: 13, design: .monospaced))
+                            .autocorrectionDisabled()
+                            .textInputAutocapitalization(.characters)
+                            .submitLabel(.done)
+                            .onSubmit { commitUUID() }
+                            .onChange(of: uuidDraft) { _, _ in uuidError = false }
+                        if uuidError {
+                            Text(String(localized: "settings.uuid.error"))
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                    // フォーカスが外れたら確定
+                    .onDisappear { commitUUID() }
                 } header: {
                     Text(String(localized: "settings.section.beacon"))
                 }
@@ -72,20 +112,30 @@ struct SettingsView: View {
                             .font(.system(size: 11, design: .monospaced))
                             .foregroundStyle(.secondary)
                     }
-
-                    LabeledContent(String(localized: "settings.info.uuid")) {
-                        Text(Constants.beaconUUID.uuidString)
-                            .font(.system(size: 11, design: .monospaced))
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.trailing)
-                    }
                 } header: {
                     Text(String(localized: "settings.section.info"))
                 }
             }
             .navigationTitle(String(localized: "tab.settings"))
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear { uuidDraft = uuidString }
+            // QR スキャン等で uuidString が外部から変わったとき、ドラフトも追従する
+            .onChange(of: uuidString) { _, newValue in
+                if uuidDraft != newValue { uuidDraft = newValue }
+            }
         }
+    }
+
+    // MARK: - Private
+
+    private func commitUUID() {
+        let trimmed = uuidDraft.trimmingCharacters(in: .whitespaces)
+        guard let _ = UUID(uuidString: trimmed) else {
+            uuidError = true
+            return
+        }
+        uuidString = trimmed.uppercased()
+        uuidError = false
     }
 }
 

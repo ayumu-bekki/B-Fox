@@ -4,34 +4,70 @@
 import SwiftUI
 import CoreLocation
 
+private enum Tab { case radar, qr, settings }
+
 struct ContentView: View {
 
     @StateObject private var scanner = BeaconScanner()
-    @AppStorage(Constants.majorKey)    private var major: Int   = Constants.defaultMajor
+    @AppStorage(Constants.majorKey)    private var major: Int    = Constants.defaultMajor
+    @AppStorage(Constants.uuidKey)     private var uuidString: String = Constants.defaultBFoxProximityUUID
     @AppStorage(Constants.showRSSIKey) private var showRSSI: Bool = false
 
+    @State private var selectedTab: Tab = .radar
+    @State private var showQRScanner: Bool = false
+
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             // MARK: - Tab 1: Radar
             radarTab
                 .tabItem {
                     Label(String(localized: "tab.radar"), systemImage: "dot.radiowaves.left.and.right")
                 }
+                .tag(Tab.radar)
 
-            // MARK: - Tab 2: Settings
+            // MARK: - Tab 2: QR Scan (ボタンとして機能、シートを開く)
+            Color.clear
+                .tabItem {
+                    Label(String(localized: "tab.qr"), systemImage: "qrcode.viewfinder")
+                }
+                .tag(Tab.qr)
+
+            // MARK: - Tab 3: Settings
             SettingsView()
                 .tabItem {
                     Label(String(localized: "tab.settings"), systemImage: "gearshape")
                 }
+                .tag(Tab.settings)
+        }
+        .onChange(of: selectedTab) { _, newTab in
+            if newTab == .qr {
+                showQRScanner = true
+                selectedTab = .radar
+            }
         }
         .onAppear {
-            scanner.startScanning(major: major)
+            let uuid = UUID(uuidString: uuidString) ?? Constants.beaconUUID
+            scanner.startScanning(major: major, uuid: uuid)
         }
         .onDisappear {
             scanner.stopScanning()
         }
         .onChange(of: major) { _, newValue in
             scanner.updateMajor(newValue)
+        }
+        .onChange(of: uuidString) { _, newValue in
+            guard let uuid = UUID(uuidString: newValue) else { return }
+            scanner.updateBeaconTarget(uuid: uuid, major: major)
+        }
+        .sheet(isPresented: $showQRScanner) {
+            QRScannerView { uuid, newMajor in
+                uuidString = uuid.uuidString
+                major = newMajor
+                scanner.updateBeaconTarget(uuid: uuid, major: newMajor)
+                showQRScanner = false
+            } onDismiss: {
+                showQRScanner = false
+            }
         }
     }
 
