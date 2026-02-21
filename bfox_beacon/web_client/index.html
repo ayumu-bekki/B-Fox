@@ -59,7 +59,7 @@
         var minV = 3.2, maxV = 4.2;
         var pct = Math.min(100, Math.max(0, Math.round((value - minV) / (maxV - minV) * 100)));
         var color = pct > 50 ? '#4caf50' : pct > 20 ? '#ff9800' : '#f44336';
-        document.getElementById('battery_voltage_text').innerHTML = value.toFixed(2) + "V (" + pct + "%)";
+        document.getElementById('battery_voltage_text').innerHTML = value.toFixed(2) + "V";
         document.getElementById('battery_bar_fill').style.width = pct + "%";
         document.getElementById('battery_bar_fill').style.backgroundColor = color;
       }
@@ -141,9 +141,9 @@
 
       <div id="control_panel" style="display: none;">
         <h2 class="sub_title">Battery Voltage</h2>
-        <p id="battery_voltage_text">--V (--%)</p>
+        <p id="battery_voltage_text">--V</p>
         <div class="battery-bar-bg">
-          <div id="battery_bar_fill" class="battery-bar-fill"></div>
+          <div id="battery_bar_fill" class="battery-bar-fill">&nbsp;</div>
         </div>
 
         <hr>
