@@ -6,11 +6,13 @@
 
 #include "bfox_receiver.h"
 #include "driver/gpio.h"
+#include "driver/rtc_io.h"
 #include "esp_adc/adc_cali.h"
 #include "esp_adc/adc_cali_scheme.h"
 #include "esp_gap_ble_api.h"
 #include "esp_sleep.h"
 #include "esp_system.h"
+#include "esp_timer.h"
 #include "gpio_control.h"
 #include "i2c_util.h"
 #include "logger.h"
@@ -55,7 +57,7 @@ static const uint8_t kTargetProximityUuid[16] = {
     0x54, 0xD9, 0xE2, 0xF2, 0x11, 0x88  // 54D9E2F21188
 };
 
-constexpr int32_t kSearchModeSleepThreshold = 15;
+constexpr int64_t kSleepTimeoutMs = 15000;  // Enter Deep Sleep after 15s of inactivity
 constexpr i2c_port_t kI2cPortNo = I2C_NUM_0;
 constexpr int kLcdDisplayLines = 2;
 
@@ -65,7 +67,7 @@ BFoxReceiver::BFoxReceiver()
       beacon_receive_task_(),
       receiver_status_(ReceiverStatus::kSearchMode),
       major_(0),
-      sleep_count_(0) {}
+      sleep_deadline_ms_(0) {}
 
 BFoxReceiver::~BFoxReceiver() = default;
 
@@ -135,6 +137,13 @@ void BFoxReceiver::Start() {
     gpio_set_pull_mode(gpio_num, GPIO_PULLDOWN_ONLY);
   }
 
+  // Configure RTC pullup for kWakeupGpio first, then AddMonitor() (which calls
+  // gpio_config() internally) will switch the pin back to Digital GPIO control.
+  // On Deep Sleep, esp_sleep_enable_ext1_wakeup() restores RTC control automatically.
+  rtc_gpio_init(kWakeupGpio);
+  rtc_gpio_pullup_en(kWakeupGpio);
+  rtc_gpio_pulldown_dis(kWakeupGpio);
+
   // Set Button Event
   gpio_watcher_.AddMonitor(
       GpioInputWatchTask::GpioInfo(
@@ -148,8 +157,6 @@ void BFoxReceiver::Start() {
       GpioInputWatchTask::GpioPullUpDown::kPullUpResistorEnable);
   gpio_watcher_.Start();
 
-  // Setting to wake up from DeepSleep when D1 is LOW
-  // Note: called after gpio_config() inside AddMonitor to ensure correct pin state
   esp_sleep_enable_ext1_wakeup((1ULL << kWakeupGpio), ESP_EXT1_WAKEUP_ANY_LOW);
 
   // Ble Receive Task
@@ -161,6 +168,9 @@ void BFoxReceiver::Start() {
   beacon_receive_task_->Start();
 
   ESP_LOGI(kTag, "Activation Complete B-Fox Receiver System.");
+
+  // Set initial sleep deadline
+  sleep_deadline_ms_ = esp_timer_get_time() / 1000 + kSleepTimeoutMs;
 
   util::SleepMillisecond(2000);  // Initial wait time
 
@@ -176,10 +186,10 @@ void BFoxReceiver::Start() {
 }
 
 void BFoxReceiver::BeaconSearchMode() {
-  // Sleep after a certain number of iterations
-  ++sleep_count_;
-  ESP_LOGI(kTag, "Cnt:%d", sleep_count_);
-  if (kSearchModeSleepThreshold <= sleep_count_) {
+  // Enter Deep Sleep if the deadline has passed
+  const int64_t now_ms = esp_timer_get_time() / 1000;
+  ESP_LOGI(kTag, "Sleep in %lldms", sleep_deadline_ms_.load() - now_ms);
+  if (now_ms >= sleep_deadline_ms_) {
     ESP_LOGI(kTag, "Sleep...");
     st7032_.Clear();
     esp_deep_sleep_start();
@@ -215,14 +225,13 @@ void BFoxReceiver::BeaconSearchMode() {
     }
   }
 
-  util::SleepMillisecond(2000);
+  util::SleepMillisecond(500);
 }
 
 void BFoxReceiver::SettingMode() {
-  // Sleep after a certain number of iterations
-  ++sleep_count_;
-  ESP_LOGI(kTag, "Cnt:%d", sleep_count_);
-  if (100 <= sleep_count_) {
+  // Restart if deadline passed during setting mode
+  const int64_t now_ms = esp_timer_get_time() / 1000;
+  if (now_ms >= sleep_deadline_ms_) {
     st7032_.SetCursor(0, 0);
     st7032_.Print("Restart...      ");
     st7032_.SetCursor(0, 1);
@@ -260,17 +269,16 @@ void BFoxReceiver::SettingFinishMode() {
 }
 
 void BFoxReceiver::OnActivityButton() {
-  ESP_LOGI(kTag, "OnActivityButton: reset sleep count");
-  sleep_count_ = 0;
+  ESP_LOGI(kTag, "OnActivityButton: extend sleep deadline");
+  sleep_deadline_ms_ = esp_timer_get_time() / 1000 + kSleepTimeoutMs;
 }
 
 void BFoxReceiver::OnSetMajorButton() {
   ESP_LOGI(kTag, "OnSetMajorButton");
+  sleep_deadline_ms_ = esp_timer_get_time() / 1000 + kSleepTimeoutMs;
   if (receiver_status_ == ReceiverStatus::kSearchMode) {
-    sleep_count_ = 0;
     receiver_status_ = ReceiverStatus::kSettingMode;
   } else if (receiver_status_ == ReceiverStatus::kSettingMode) {
-    sleep_count_ = 0;
     major_ = (major_ + 1) % 10;
   }
 }

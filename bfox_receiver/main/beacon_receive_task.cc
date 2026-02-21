@@ -10,6 +10,7 @@
 #include <esp_gap_ble_api.h>
 #include <esp_gatt_defs.h>
 #include <esp_gattc_api.h>
+#include <esp_timer.h>
 #include <freertos/FreeRTOS.h>
 
 #include <algorithm>
@@ -58,7 +59,7 @@ void BeaconReceiveTask::Initialize() {
       .own_addr_type = BLE_ADDR_TYPE_PUBLIC,
       .scan_filter_policy = BLE_SCAN_FILTER_ALLOW_ALL,
       .scan_interval = 0x00A0,  // 160 * 0.625ms = 100ms
-      .scan_window = 0x0060,    //  96 * 0.625ms =  60ms (duty cycle 60%)
+      .scan_window = 0x00A0,    // 160 * 0.625ms = 100ms (continuous scan, duty cycle 100%)
       .scan_duplicate = BLE_SCAN_DUPLICATE_DISABLE};
   esp_ble_gap_set_scan_params(&ble_scan_params);
 }
@@ -66,12 +67,20 @@ void BeaconReceiveTask::Initialize() {
 void BeaconReceiveTask::Update() { util::SleepMillisecond(2000); }
 
 std::vector<BleBeaconItem> BeaconReceiveTask::GetRSSISortedItems() {
+  const int64_t now_ms = esp_timer_get_time() / 1000;
   std::vector<BleBeaconItem> ble_beacon_list;
   {
     std::scoped_lock lock(beacon_items_mutex_);
+    // Remove entries not seen within the expiry window
+    for (auto it = ble_beacon_items_.begin(); it != ble_beacon_items_.end();) {
+      if ((now_ms - it->last_seen_ms) > kBeaconExpiryMs) {
+        it = ble_beacon_items_.erase(it);
+      } else {
+        ++it;
+      }
+    }
     ble_beacon_list.reserve(ble_beacon_items_.size());
     ble_beacon_list.assign(ble_beacon_items_.begin(), ble_beacon_items_.end());
-    ble_beacon_items_.clear();
   }
   std::sort(ble_beacon_list.begin(), ble_beacon_list.end(),
             [](const BleBeaconItem& a, const BleBeaconItem& b) {
@@ -116,7 +125,9 @@ void BeaconReceiveTask::EventGap(esp_gap_ble_cb_event_t event,
           return;
         }
 
-        BleBeaconItem item = {.minor = minor, .rssi = param->scan_rst.rssi};
+        BleBeaconItem item = {.minor = minor,
+                              .rssi = param->scan_rst.rssi,
+                              .last_seen_ms = esp_timer_get_time() / 1000};
 
         {
           std::scoped_lock lock(beacon_items_mutex_);

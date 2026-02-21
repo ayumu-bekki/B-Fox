@@ -22,6 +22,7 @@ class BeaconReceiveTask final : public Task {
   static constexpr const char* kTaskName = "BeaconReceiveTask";
   static constexpr int kPriority = Task::kPriorityLow;
   static constexpr int kCoreId = tskNO_AFFINITY;
+  static constexpr int64_t kBeaconExpiryMs = 2000;  // entries unseen for 2s are removed
 
  private:
   static BeaconReceiveTask* instance_;

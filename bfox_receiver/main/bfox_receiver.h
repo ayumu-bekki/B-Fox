@@ -4,6 +4,8 @@
 // (C)2025 bekki.jp
 
 // Include ----------------------
+#include <atomic>
+#include <cstdint>
 #include <memory>
 
 #include "beacon_receive_task.h"
@@ -44,7 +46,7 @@ class BFoxReceiver final : public BFoxReceiverInterface,
   BeaconReceiveTaskUniquePtr beacon_receive_task_;
   ReceiverStatus receiver_status_;
   uint16_t major_;
-  int32_t sleep_count_;
+  std::atomic<int64_t> sleep_deadline_ms_;  // absolute time (ms) to enter Deep Sleep
 };
 
 }  // namespace bfox_receiver_system
