@@ -4,84 +4,76 @@
 // Include ----------------------
 #include "receiver_setting.h"
 
-#include <algorithm>
-#include <sstream>
-#include <stdexcept>
+#include <nvs_flash.h>
 
-#include "file_system.h"
 #include "logger.h"
 
 namespace bfox_receiver_system {
 
-constexpr const char* kSettingFileName = "receiver_setting.json";
+static constexpr const char kNvsNamespace[] = "bfox";
+static constexpr const char kKeyMajor[] = "major";
 
 ReceiverSetting::ReceiverSetting() : is_active_(false), major_(0) {}
 
 bool ReceiverSetting::Save() {
-  cJSON* json = cJSON_CreateObject();
-  if (json == nullptr) {
-    ESP_LOGE(kTag, "Failed Create JSON Object");
-    return false;
-  }
-  cJSON_AddNumberToObject(json, "major", major_);
-
-  // Convert JSON to string
-  char* json_string = cJSON_PrintUnformatted(json);
-  if (json_string == nullptr) {
-    ESP_LOGE(kTag, "Failed JSON String");
-    cJSON_Delete(json);
+  nvs_handle_t handle;
+  esp_err_t err = nvs_open(kNvsNamespace, NVS_READWRITE, &handle);
+  if (err != ESP_OK) {
+    ESP_LOGE(kTag, "NVS open failed: %s", esp_err_to_name(err));
     return false;
   }
 
-  ESP_LOGI(kTag, "OutJson:%s", json_string);
+  bool ok = (nvs_set_u16(handle, kKeyMajor, major_) == ESP_OK);
+  if (ok) {
+    err = nvs_commit(handle);
+    if (err != ESP_OK) {
+      ESP_LOGE(kTag, "NVS commit failed: %s", esp_err_to_name(err));
+      ok = false;
+    }
+  } else {
+    ESP_LOGE(kTag, "NVS set failed");
+  }
 
-  bool ret = file_system::Write(kSettingFileName, json_string);
-
-  free(json_string);
-  cJSON_Delete(json);
-
-  return ret;
+  nvs_close(handle);
+  return ok;
 }
 
 bool ReceiverSetting::Load() {
-  std::string body;
-  const bool is_read_ok = file_system::Read(kSettingFileName, body);
-  if (!is_read_ok) {
+  nvs_handle_t handle;
+  esp_err_t err = nvs_open(kNvsNamespace, NVS_READONLY, &handle);
+  if (err != ESP_OK) {
+    ESP_LOGW(kTag, "NVS open failed (first boot?): %s", esp_err_to_name(err));
     return false;
   }
 
-  major_ = 0;
+  uint16_t major = 0;
+  err = nvs_get_u16(handle, kKeyMajor, &major);
+  nvs_close(handle);
 
-  cJSON* json_root = nullptr;
-  json_root = cJSON_Parse(body.c_str());
-  if (!json_root) {
-    const char* error_ptr = cJSON_GetErrorPtr();
-    if (error_ptr) {
-      ESP_LOGE(kTag, "Parse Error %s", error_ptr);
-      return false;
-    }
-    ESP_LOGE(kTag, "Parse Error");
+  if (err != ESP_OK) {
+    ESP_LOGE(kTag, "NVS get major failed: %s", esp_err_to_name(err));
     return false;
   }
 
-  // Major
-  const cJSON* json_major =
-      cJSON_GetObjectItemCaseSensitive(json_root, "major");
-  if (!cJSON_IsNumber(json_major)) {
-    ESP_LOGE(kTag, "Illegal object type major.");
-    cJSON_Delete(json_root);
-    return false;
-  }
-  major_ = json_major->valueint;
-
+  major_ = major;
   is_active_ = true;
-
-  cJSON_Delete(json_root);
-
   return true;
 }
 
-bool ReceiverSetting::Delete() { return file_system::Delete(kSettingFileName); }
+bool ReceiverSetting::Delete() {
+  nvs_handle_t handle;
+  esp_err_t err = nvs_open(kNvsNamespace, NVS_READWRITE, &handle);
+  if (err != ESP_OK) {
+    ESP_LOGE(kTag, "NVS open failed: %s", esp_err_to_name(err));
+    return false;
+  }
+  err = nvs_erase_all(handle);
+  if (err == ESP_OK) {
+    nvs_commit(handle);
+  }
+  nvs_close(handle);
+  return err == ESP_OK;
+}
 
 bool ReceiverSetting::IsActive() const { return is_active_; }
 

@@ -57,8 +57,8 @@ void BeaconReceiveTask::Initialize() {
       .scan_type = BLE_SCAN_TYPE_PASSIVE,
       .own_addr_type = BLE_ADDR_TYPE_PUBLIC,
       .scan_filter_policy = BLE_SCAN_FILTER_ALLOW_ALL,
-      .scan_interval = 0xA0,
-      .scan_window = 0x30,
+      .scan_interval = 0x00A0,  // 160 * 0.625ms = 100ms
+      .scan_window = 0x0060,    //  96 * 0.625ms =  60ms (duty cycle 60%)
       .scan_duplicate = BLE_SCAN_DUPLICATE_DISABLE};
   esp_ble_gap_set_scan_params(&ble_scan_params);
 }

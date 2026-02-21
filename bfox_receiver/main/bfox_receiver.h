@@ -34,6 +34,7 @@ class BFoxReceiver final : public BFoxReceiverInterface,
   void SettingMode();
   void SettingFinishMode();
 
+  void OnActivityButton();
   void OnSetMajorButton();
   void OnSetMajorLongButton();
 

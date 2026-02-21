@@ -6,13 +6,11 @@
 
 #include "bfox_receiver.h"
 #include "driver/gpio.h"
-#include "driver/rtc_io.h"
 #include "esp_adc/adc_cali.h"
 #include "esp_adc/adc_cali_scheme.h"
 #include "esp_gap_ble_api.h"
 #include "esp_sleep.h"
 #include "esp_system.h"
-#include "file_system.h"
 #include "gpio_control.h"
 #include "i2c_util.h"
 #include "logger.h"
@@ -105,9 +103,6 @@ void BFoxReceiver::Start() {
     esp_deep_sleep_start();
   }
 
-  // Mount File System
-  file_system::Mount();
-
   // Read Setting
   ReceiverSetting setting;
   setting.Load();
@@ -127,13 +122,6 @@ void BFoxReceiver::Start() {
   st7032_.SetCursor(0, 1);
   st7032_.Printf(" Maj:%d Bat:%4.2fV", major_, voltage);
 
-  // Setting to wake up from DeepSleep when D1 is LOW
-  rtc_gpio_init(kWakeupGpio);
-  rtc_gpio_set_direction(kWakeupGpio, RTC_GPIO_MODE_INPUT_ONLY);
-  rtc_gpio_pullup_en(kWakeupGpio);
-  rtc_gpio_pulldown_dis(kWakeupGpio);
-  esp_sleep_enable_ext1_wakeup((1ULL << kWakeupGpio), ESP_EXT1_WAKEUP_ANY_LOW);
-
   // Use Ext Antenna
   gpio::InitOutput(xiao_esp32c6_pin::kWifiEnable,
                    false);  // Activate RF switch control (kWifiEnable = False)
@@ -150,10 +138,19 @@ void BFoxReceiver::Start() {
   // Set Button Event
   gpio_watcher_.AddMonitor(
       GpioInputWatchTask::GpioInfo(
+          kWakeupGpio, std::bind(&BFoxReceiver::OnActivityButton, this),
+          nullptr),
+      GpioInputWatchTask::GpioPullUpDown::kPullUpResistorEnable);
+  gpio_watcher_.AddMonitor(
+      GpioInputWatchTask::GpioInfo(
           kMajorChangeGpio, std::bind(&BFoxReceiver::OnSetMajorButton, this),
           std::bind(&BFoxReceiver::OnSetMajorLongButton, this)),
       GpioInputWatchTask::GpioPullUpDown::kPullUpResistorEnable);
   gpio_watcher_.Start();
+
+  // Setting to wake up from DeepSleep when D1 is LOW
+  // Note: called after gpio_config() inside AddMonitor to ensure correct pin state
+  esp_sleep_enable_ext1_wakeup((1ULL << kWakeupGpio), ESP_EXT1_WAKEUP_ANY_LOW);
 
   // Ble Receive Task
   beacon_receive_task_ =
@@ -260,6 +257,11 @@ void BFoxReceiver::SettingFinishMode() {
   ESP_LOGI(kTag, "Restart");
   util::SleepMillisecond(100);
   esp_restart();
+}
+
+void BFoxReceiver::OnActivityButton() {
+  ESP_LOGI(kTag, "OnActivityButton: reset sleep count");
+  sleep_count_ = 0;
 }
 
 void BFoxReceiver::OnSetMajorButton() {

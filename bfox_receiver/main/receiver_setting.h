@@ -4,12 +4,10 @@
 // (C)2025 bekki.jp
 
 // Include ----------------------
-#include <cJSON.h>
-#include <esp_bt.h>
+#include <nvs.h>
 
 #include <cstdint>
 #include <memory>
-#include <string>
 
 namespace bfox_receiver_system {
 
@@ -26,9 +24,6 @@ class ReceiverSetting final {
   uint16_t GetMajor() const;
 
   void SetMajor(uint16_t major);
-
- private:
-  bool Parse(const std::string& body) noexcept;
 
  private:
   bool is_active_;
