@@ -3,8 +3,8 @@
 // ESP32 B-Fox Beacon
 // (C)2025 bekki.jp
 
-#include <cJSON.h>
 #include <esp_bt.h>
+#include <nvs.h>
 
 #include <cstdint>
 #include <memory>
@@ -37,6 +37,7 @@ class BeaconSetting final {
   uint16_t GetMinor() const;
   int32_t GetMeasuredPower() const;
   int32_t GetTxPower() const;
+  uint16_t GetAdvIntervalMs() const;
   esp_power_level_t GetEspTxPowerLevel() const;
 
   void SetDeviceName(const std::string& device_name);
@@ -44,6 +45,7 @@ class BeaconSetting final {
   void SetMinor(uint16_t minor);
   void SetMeasuredPower(int32_t measured_power);
   void SetTxPower(int32_t tx_power);
+  void SetAdvIntervalMs(uint16_t adv_interval_ms);
 
  private:
   bool Parse(const std::string& body) noexcept;
@@ -55,6 +57,7 @@ class BeaconSetting final {
   uint16_t minor_;
   int32_t measured_power_;
   int32_t tx_power_;
+  uint16_t adv_interval_ms_;
 };
 
 using BeaconSettingSharedPtr = std::shared_ptr<BeaconSetting>;

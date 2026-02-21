@@ -3,16 +3,19 @@
 
 #include "beacon_setting.h"
 
-#include <algorithm>
-#include <sstream>
-#include <stdexcept>
+#include <nvs_flash.h>
 
-#include "file_system.h"
 #include "logger.h"
 
 namespace bfox_beacon_system {
 
-constexpr const char kSettingFileName[] = "beacon_setting.json";
+static constexpr const char kNvsNamespace[] = "bfox";
+static constexpr const char kKeyDeviceName[] = "device_name";
+static constexpr const char kKeyMajor[] = "major";
+static constexpr const char kKeyMinor[] = "minor";
+static constexpr const char kKeyMeasuredPower[] = "measured_power";
+static constexpr const char kKeyTxPower[] = "tx_power";
+static constexpr const char kKeyAdvIntervalMs[] = "adv_interval_ms";
 
 BeaconSetting::BeaconSetting()
     : is_active_(false),
@@ -20,110 +23,115 @@ BeaconSetting::BeaconSetting()
       major_(0),
       minor_(0),
       measured_power_(-59),
-      tx_power_(TxPower::kHigh) {}
+      tx_power_(TxPower::kHigh),
+      adv_interval_ms_(100) {}
 
 bool BeaconSetting::Save() {
-  // ex) {"device_name": "bfox Beacon", "major":0, "minor":0}
-  cJSON *json = cJSON_CreateObject();
-  if (json == NULL) {
-    ESP_LOGE(TAG, "Failed Create JSON Object");
-    return false;
-  }
-  cJSON_AddStringToObject(json, "device_name", device_name_.c_str());
-  cJSON_AddNumberToObject(json, "major", major_);
-  cJSON_AddNumberToObject(json, "minor", minor_);
-  cJSON_AddNumberToObject(json, "tx_power", tx_power_);
-
-  // Convert JSON to string
-  char *json_string = cJSON_PrintUnformatted(json);
-  if (json_string == nullptr) {
-    ESP_LOGE(TAG, "Failed JSON String");
-    cJSON_Delete(json);
+  nvs_handle_t handle;
+  esp_err_t err = nvs_open(kNvsNamespace, NVS_READWRITE, &handle);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "NVS open failed: %s", esp_err_to_name(err));
     return false;
   }
 
-  ESP_LOGI(TAG, "OutJson:%s", json_string);
+  bool ok = true;
+  ok &= (nvs_set_str(handle, kKeyDeviceName, device_name_.c_str()) == ESP_OK);
+  ok &= (nvs_set_u16(handle, kKeyMajor, major_) == ESP_OK);
+  ok &= (nvs_set_u16(handle, kKeyMinor, minor_) == ESP_OK);
+  ok &= (nvs_set_i32(handle, kKeyMeasuredPower, measured_power_) == ESP_OK);
+  ok &= (nvs_set_i32(handle, kKeyTxPower, tx_power_) == ESP_OK);
+  ok &= (nvs_set_u16(handle, kKeyAdvIntervalMs, adv_interval_ms_) == ESP_OK);
 
-  bool ret = file_system::Write(kSettingFileName, json_string);
+  if (ok) {
+    err = nvs_commit(handle);
+    if (err != ESP_OK) {
+      ESP_LOGE(TAG, "NVS commit failed: %s", esp_err_to_name(err));
+      ok = false;
+    }
+  } else {
+    ESP_LOGE(TAG, "NVS set failed");
+  }
 
-  free(json_string);
-  cJSON_Delete(json);
-
-  return ret;
+  nvs_close(handle);
+  return ok;
 }
 
 bool BeaconSetting::Load() {
-  std::string body;
-  const bool is_read_ok = file_system::Read(kSettingFileName, body);
-  if (!is_read_ok) {
+  nvs_handle_t handle;
+  esp_err_t err = nvs_open(kNvsNamespace, NVS_READONLY, &handle);
+  if (err != ESP_OK) {
+    ESP_LOGW(TAG, "NVS open failed (first boot?): %s", esp_err_to_name(err));
     return false;
   }
 
-  device_name_ = "";
-  major_ = 0;
-  minor_ = 0;
-  tx_power_ = TxPower::kHigh;
+  // device_name
+  size_t name_len = 0;
+  err = nvs_get_str(handle, kKeyDeviceName, nullptr, &name_len);
+  if (err != ESP_OK || name_len == 0) {
+    ESP_LOGE(TAG, "NVS get device_name length failed: %s", esp_err_to_name(err));
+    nvs_close(handle);
+    return false;
+  }
+  std::string device_name(name_len, '\0');
+  err = nvs_get_str(handle, kKeyDeviceName, &device_name[0], &name_len);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "NVS get device_name failed: %s", esp_err_to_name(err));
+    nvs_close(handle);
+    return false;
+  }
+  // nvs_get_str includes null terminator in name_len; trim it
+  if (!device_name.empty() && device_name.back() == '\0') {
+    device_name.pop_back();
+  }
 
-  cJSON *json_root = nullptr;
-  json_root = cJSON_Parse(body.c_str());
-  if (!json_root) {
-    const char *error_ptr = cJSON_GetErrorPtr();
-    if (error_ptr) {
-      ESP_LOGE(TAG, "Parse Error %s", error_ptr);
-      return false;
-    }
-    ESP_LOGE(TAG, "Parse Error");
+  uint16_t major = 0;
+  uint16_t minor = 0;
+  int32_t measured_power = -59;
+  int32_t tx_power = TxPower::kHigh;
+  uint16_t adv_interval_ms = 100;
+
+  if (nvs_get_u16(handle, kKeyMajor, &major) != ESP_OK ||
+      nvs_get_u16(handle, kKeyMinor, &minor) != ESP_OK ||
+      nvs_get_i32(handle, kKeyMeasuredPower, &measured_power) != ESP_OK ||
+      nvs_get_i32(handle, kKeyTxPower, &tx_power) != ESP_OK) {
+    ESP_LOGE(TAG, "NVS get numeric value failed");
+    nvs_close(handle);
     return false;
   }
 
-  // Get Device Name
-  const cJSON *const json_device_name =
-      cJSON_GetObjectItemCaseSensitive(json_root, "device_name");
-  if (!cJSON_IsString(json_device_name)) {
-    ESP_LOGE(TAG, "Illegal object type device_name.");
-    cJSON_Delete(json_root);
-    return false;
+  // adv_interval_ms is optional (backward compat: default 100ms if missing)
+  if (nvs_get_u16(handle, kKeyAdvIntervalMs, &adv_interval_ms) != ESP_OK) {
+    ESP_LOGW(TAG, "adv_interval_ms not found in NVS, using default 100ms");
+    adv_interval_ms = 100;
   }
-  device_name_ = json_device_name->valuestring;
 
-  // Major
-  const cJSON *const json_major =
-      cJSON_GetObjectItemCaseSensitive(json_root, "major");
-  if (!cJSON_IsNumber(json_major)) {
-    ESP_LOGE(TAG, "Illegal object type major.");
-    cJSON_Delete(json_root);
-    return false;
-  }
-  major_ = json_major->valueint;
+  nvs_close(handle);
 
-  // Minor
-  const cJSON *const json_minor =
-      cJSON_GetObjectItemCaseSensitive(json_root, "minor");
-  if (!cJSON_IsNumber(json_minor)) {
-    ESP_LOGE(TAG, "Illegal object type minor.");
-    cJSON_Delete(json_root);
-    return false;
-  }
-  minor_ = json_minor->valueint;
-
-  // TxPower
-  const cJSON *const json_tx_power =
-      cJSON_GetObjectItemCaseSensitive(json_root, "tx_power");
-  if (!cJSON_IsNumber(json_tx_power)) {
-    ESP_LOGE(TAG, "Illegal object type tx_power.");
-    cJSON_Delete(json_root);
-    return false;
-  }
-  tx_power_ = json_tx_power->valueint;
-
+  device_name_ = device_name;
+  major_ = major;
+  minor_ = minor;
+  measured_power_ = measured_power;
+  tx_power_ = tx_power;
+  adv_interval_ms_ = adv_interval_ms;
   is_active_ = true;
-
-  cJSON_Delete(json_root);
 
   return true;
 }
 
-bool BeaconSetting::Delete() { return file_system::Delete(kSettingFileName); }
+bool BeaconSetting::Delete() {
+  nvs_handle_t handle;
+  esp_err_t err = nvs_open(kNvsNamespace, NVS_READWRITE, &handle);
+  if (err != ESP_OK) {
+    ESP_LOGE(TAG, "NVS open failed: %s", esp_err_to_name(err));
+    return false;
+  }
+  err = nvs_erase_all(handle);
+  if (err == ESP_OK) {
+    nvs_commit(handle);
+  }
+  nvs_close(handle);
+  return err == ESP_OK;
+}
 
 bool BeaconSetting::IsActive() const { return is_active_; }
 
@@ -136,6 +144,8 @@ uint16_t BeaconSetting::GetMinor() const { return minor_; }
 int32_t BeaconSetting::GetMeasuredPower() const { return measured_power_; }
 
 int32_t BeaconSetting::GetTxPower() const { return tx_power_; }
+
+uint16_t BeaconSetting::GetAdvIntervalMs() const { return adv_interval_ms_; }
 
 esp_power_level_t BeaconSetting::GetEspTxPowerLevel() const {
   if (tx_power_ <= 0 || kMaxTxPower <= tx_power_) {
@@ -161,5 +171,8 @@ void BeaconSetting::SetMeasuredPower(int32_t measured_power) {
   measured_power_ = measured_power;
 }
 void BeaconSetting::SetTxPower(int32_t tx_power) { tx_power_ = tx_power; }
+void BeaconSetting::SetAdvIntervalMs(uint16_t adv_interval_ms) {
+  adv_interval_ms_ = adv_interval_ms;
+}
 
 }  // namespace bfox_beacon_system

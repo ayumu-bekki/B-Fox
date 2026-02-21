@@ -17,7 +17,6 @@
 #include "bfox_beacon.h"
 #include "ble_device.h"
 #include "ble_services.h"
-#include "file_system.h"
 #include "gpio_control.h"
 #include "ibeacon.h"
 #include "logger.h"
@@ -94,9 +93,6 @@ void BFoxBeacon::Start() {
     ret = nvs_flash_init();
   }
   ESP_ERROR_CHECK(ret);
-
-  // Mount File System
-  file_system::Mount();
 
   // Load Setting
   setting_ = std::make_shared<BeaconSetting>();
@@ -193,7 +189,7 @@ void BFoxBeacon::CreateBLEService() {
   BleDevice* const ble_device = BleDevice::GetInstance();
   ble_device->Initialize(setting_->GetDeviceName(), ibeacon_adv_data);
   ble_device->AddService(ble_BFOX_service);
-  ble_device->StartAdvertising();
+  ble_device->StartAdvertising(setting_->GetAdvIntervalMs());
 
   esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_DEFAULT,
                        setting_->GetEspTxPowerLevel());

@@ -72,9 +72,9 @@ void BleBeaconSettingCharacteristic::Write(
     return;
   }
 
-  // [1:device_name_length][x:device_name][2:major][2:minor][2:measured_power][2:tx_power]
+  // [1:device_name_length][x:device_name][2:major][2:minor][2:measured_power][2:tx_power][2:adv_interval_ms]
   const uint8_t device_name_length = *data->data();
-  if ((device_name_length + 9) != data->size()) {
+  if ((device_name_length + 11) != data->size()) {
     ESP_LOGE(TAG, "BleBeaconSettingCharacteristic Invalid Data Length");
     return;
   }
@@ -89,6 +89,8 @@ void BleBeaconSettingCharacteristic::Write(
       data->data() + 1 + device_name_length + 4);
   const int16_t tx_power = *reinterpret_cast<const int16_t*>(
       data->data() + 1 + device_name_length + 6);
+  const uint16_t adv_interval_ms = *reinterpret_cast<const uint16_t*>(
+      data->data() + 1 + device_name_length + 8);
 
   ESP_LOGI(TAG, "Write Beacon Setting");
   ESP_LOGI(TAG, " Name:%s", device_name.c_str());
@@ -96,6 +98,7 @@ void BleBeaconSettingCharacteristic::Write(
   ESP_LOGI(TAG, " Minor:%u", minor);
   ESP_LOGI(TAG, " MesuredPower:%d", measured_power);
   ESP_LOGI(TAG, " TxPower:%d", tx_power);
+  ESP_LOGI(TAG, " AdvIntervalMs:%u", adv_interval_ms);
 
   // Set to BeaconSetting
   BeaconSetting setting;
@@ -104,6 +107,7 @@ void BleBeaconSettingCharacteristic::Write(
   setting.SetMinor(minor);
   setting.SetMeasuredPower(measured_power);
   setting.SetTxPower(tx_power);
+  setting.SetAdvIntervalMs(adv_interval_ms);
   setting.Save();
 
   // Restart after 3 seconds
@@ -129,9 +133,9 @@ void BleBeaconSettingCharacteristic::Read(std::vector<uint8_t>* const data) {
     return;
   }
 
-  // [1:device_name_length][x:device_name][2:major][2:minor][2:measured_power][2:tx_power]
+  // [1:device_name_length][x:device_name][2:major][2:minor][2:measured_power][2:tx_power][2:adv_interval_ms]
   const uint8_t device_name_length = setting->GetDeviceName().length();
-  std::vector<uint8_t> payload(device_name_length + 9);
+  std::vector<uint8_t> payload(device_name_length + 11);
 
   *reinterpret_cast<uint8_t*>(payload.data()) = device_name_length;
   std::memcpy(reinterpret_cast<uint8_t*>(payload.data() + 1),
@@ -144,6 +148,8 @@ void BleBeaconSettingCharacteristic::Read(std::vector<uint8_t>* const data) {
       setting->GetMeasuredPower();
   *reinterpret_cast<int16_t*>(payload.data() + 1 + device_name_length + 6) =
       setting->GetTxPower();
+  *reinterpret_cast<uint16_t*>(payload.data() + 1 + device_name_length + 8) =
+      setting->GetAdvIntervalMs();
 
   data->insert(data->end(), payload.begin(), payload.end());
 }
@@ -334,7 +340,7 @@ void BleBFoxService::GattsEvent(esp_gatts_cb_event_t event,
   } else if (event == ESP_GATTS_DISCONNECT_EVT) {
     ESP_LOGI(TAG, "ESP_GATTS_DISCONNECT_EVT, disconnect reason 0x%x",
              param->disconnect.reason);
-    BleDevice::GetInstance()->StartAdvertising();
+    BleDevice::GetInstance()->RestartAdvertising();
 
   } else if (event == ESP_GATTS_CONF_EVT) {
     ESP_LOGI(TAG, "ESP_GATTS_CONF_EVT, status %d attr_handle %d",

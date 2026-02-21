@@ -63,13 +63,15 @@ class BleDevice final {
                   esp_ble_gatts_cb_param_t* param);
   void Initialize(const std::string& device_name, BleIBeacon& ibeacon_adv_data);
   void AddService(BleServiceInterfaceSharedPtr bleService);
-  void StartAdvertising();
+  void StartAdvertising(uint16_t interval_ms);
+  void RestartAdvertising();
 
  private:
   BleDevice();
 
  private:
   std::vector<BleServiceInterfaceSharedPtr> services_;
+  uint16_t adv_interval_ms_;
 };
 
 }  // namespace bfox_beacon_system

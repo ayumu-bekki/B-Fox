@@ -48,6 +48,7 @@
         document.getElementById('minor').value = data.getUint16(1 + device_name_length + 2, true);
         document.getElementById('measured_power').value = data.getInt16(1 + device_name_length + 4, true);
         document.getElementById('tx_power').value = data.getInt16(1 + device_name_length + 6, true);
+        document.getElementById('adv_interval_ms').value = data.getUint16(1 + device_name_length + 8, true);
 
         ble.read('BFoxBeaconBatteryVoltageChar');
       }
@@ -87,7 +88,7 @@
         var device_name = document.getElementById('device_name').value;
         var device_name_length = device_name.length;;
 
-        var buffer = new ArrayBuffer(device_name_length + 9);
+        var buffer = new ArrayBuffer(device_name_length + 11);
         var view = new DataView(buffer);
 
         view.setUint8(0, device_name_length);
@@ -100,6 +101,7 @@
         view.setUint16(1 + device_name_length + 2, document.getElementById('minor').value, true);
         view.setInt16(1 + device_name_length + 4, document.getElementById('measured_power').value, true);
         view.setInt16(1 + device_name_length + 6, document.getElementById('tx_power').value, true);
+        view.setUint16(1 + device_name_length + 8, parseInt(document.getElementById('adv_interval_ms').value), true);
 
         ble.write('BFoxBeaconSetting', new Uint8Array(buffer));
       });
@@ -185,6 +187,18 @@
               <option value="3">Low +3dbm (2mW)</option>
               <option value="4">S_Low -12dBm (0.06mW)</option>
             </select>
+          </div>
+
+          <div class="form-group">
+            <label for="adv_interval_ms">Advertising Interval</label>
+            <select id="adv_interval_ms" name="adv_interval_ms" required>
+              <option value="" disabled>Please select</option>
+              <option value="100">100 ms</option>
+              <option value="200">200 ms</option>
+              <option value="500">500 ms</option>
+              <option value="1000">1000 ms</option>
+            </select>
+            <div class="rules">📝 Shorter interval increases power consumption</div>
           </div>
 
           <button id="update_setting" class="button">Apply Settings (Reboot)</button>

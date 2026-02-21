@@ -27,7 +27,7 @@ BleDevice* BleDevice::GetInstance() {
   return this_;
 }
 
-BleDevice::BleDevice() : services_() {}
+BleDevice::BleDevice() : services_(), adv_interval_ms_(100) {}
 
 void BleDevice::Initialize(const std::string& device_name,
                            BleIBeacon& ibeacon_adv_data) {
@@ -155,13 +155,18 @@ void BleDevice::GattsEvent(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
   }
 }
 
-void BleDevice::StartAdvertising() {
-  // iBeacon Adv interval is 100ms (160(0xA0) * 0.625ms = 100ms)
+void BleDevice::StartAdvertising(uint16_t interval_ms) {
+  adv_interval_ms_ = interval_ms;
+  // BLE adv interval unit: N * 0.625ms (range 0x0020 - 0x4000)
+  // Clamp to valid range [32, 16384] = [20ms, 10240ms]
+  const uint16_t n =
+      static_cast<uint16_t>(static_cast<uint32_t>(interval_ms) * 8 / 5);
+  const uint16_t adv_int =
+      (n < 0x0020) ? 0x0020 : (n > 0x4000) ? 0x4000 : n;
+  ESP_LOGI(TAG, "StartAdvertising interval:%dms (0x%04X)", interval_ms, adv_int);
   esp_ble_adv_params_t adv_params = {
-      .adv_int_min = 0x00A0,  // Minimum Advertising Interval (range 0x0020 -
-                              // 0x4000) N * 0.625ms
-      .adv_int_max = 0x00A0,  // Maximum Advertising Interval (range 0x0020 -
-                              // 0x4000) N * 0.625ms
+      .adv_int_min = adv_int,
+      .adv_int_max = adv_int,
       .adv_type = ADV_TYPE_IND,
       .own_addr_type = BLE_ADDR_TYPE_PUBLIC,
       .peer_addr = {},
@@ -170,6 +175,10 @@ void BleDevice::StartAdvertising() {
       .adv_filter_policy = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY,
   };
   esp_ble_gap_start_advertising(&adv_params);
+}
+
+void BleDevice::RestartAdvertising() {
+  StartAdvertising(adv_interval_ms_);
 }
 
 }  // namespace bfox_beacon_system
