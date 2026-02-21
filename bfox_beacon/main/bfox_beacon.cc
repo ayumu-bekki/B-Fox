@@ -121,15 +121,6 @@ void BFoxBeacon::Start() {
 }
 
 void BFoxBeacon::CreateBLEService() {
-  // BLE Set Coded Phy
-  esp_err_t res = esp_ble_gap_set_preferred_default_phy(
-      ESP_BLE_GAP_PHY_CODED_PREF_MASK, ESP_BLE_GAP_PHY_CODED_PREF_MASK);
-  if (res == ESP_OK) {
-    ESP_LOGI(TAG, "BLE Coded Phy Enable");
-  } else {
-    ESP_LOGI(TAG, "BLE Coded Phy Disable");
-  }
-
   // Create BleVoltageCharacteristic : 53bf4a46-41ba-46a3-b675-4fb7f0770905
   constexpr esp_gatt_char_prop_t voltage_char_property =
       ESP_GATT_CHAR_PROP_BIT_READ;
