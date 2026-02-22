@@ -3,52 +3,17 @@
 // ESP32 B-Fox Beacon
 // (C)2025 bekki.jp
 
-#include <esp_bt.h>
-#include <esp_bt_defs.h>
-#include <esp_bt_main.h>
-#include <esp_gap_ble_api.h>
-#include <esp_gatt_common_api.h>
-#include <esp_gatts_api.h>
-
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "ibeacon.h"
 
+// Forward declare for NimBLE
+struct ble_gatt_svc_def;
+struct ble_gap_event;
+
 namespace bfox_beacon_system {
-
-class BleCharacteristicInterface {
- public:
-  virtual ~BleCharacteristicInterface() {}
-
-  virtual void Write(const std::vector<uint8_t>* const data) = 0;
-  virtual void Read(std::vector<uint8_t>* const data) = 0;
-
-  virtual void SetHandle(const uint16_t handle) = 0;
-  virtual uint16_t GetHandle() const = 0;
-
-  virtual esp_bt_uuid_t GetUuid() const = 0;
-  virtual esp_gatt_char_prop_t GetProperty() const = 0;
-};
-
-using BleCharacteristicInterfaceSharedPtr =
-    std::shared_ptr<BleCharacteristicInterface>;
-
-class BleServiceInterface {
- public:
-  virtual ~BleServiceInterface() {}
-
-  virtual void GattsEvent(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
-                          esp_ble_gatts_cb_param_t* param) = 0;
-  virtual void AddCharacteristic(
-      BleCharacteristicInterfaceSharedPtr bleCharacteristic) = 0;
-
-  virtual void SetGattsIf(const uint16_t gatts_if) = 0;
-  virtual uint16_t GetAppId() const = 0;
-  virtual uint16_t GetGattsIf() const = 0;
-};
-
-using BleServiceInterfaceSharedPtr = std::shared_ptr<BleServiceInterface>;
 
 class BleDevice final {
  public:
@@ -58,20 +23,36 @@ class BleDevice final {
   static BleDevice* this_;
 
  public:
-  void GapEvent(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t* param);
-  void GattsEvent(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
-                  esp_ble_gatts_cb_param_t* param);
+  // Initialize NimBLE stack and setup device name/iBeacon data
   void Initialize(const std::string& device_name, BleIBeacon& ibeacon_adv_data);
-  void AddService(BleServiceInterfaceSharedPtr bleService);
+
+  // Register NimBLE GATT services before starting the host
+  void RegisterServices(const struct ble_gatt_svc_def* svcs);
+
+  // Start the NimBLE host task
+  void StartHost();
+
+  // Start or restart iBeacon advertising
   void StartAdvertising(uint16_t interval_ms);
   void RestartAdvertising();
 
  private:
   BleDevice();
 
+  static void HostTaskStatic(void* param);
+  static void OnSyncStatic();
+  static void OnResetStatic(int reason);
+  static int GapEventStatic(struct ble_gap_event* event, void* arg);
+
+  void HostTask();
+  void OnSync();
+  void OnReset(int reason);
+  int GapEvent(struct ble_gap_event* event, void* arg);
+
  private:
-  std::vector<BleServiceInterfaceSharedPtr> services_;
   uint16_t adv_interval_ms_;
+  BleIBeacon ibeacon_adv_data_;
+  std::string device_name_;
 };
 
 }  // namespace bfox_beacon_system

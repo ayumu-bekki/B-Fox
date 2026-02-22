@@ -3,20 +3,20 @@
 
 #include "ble_device.h"
 
-#include "ibeacon.h"
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
 #include "logger.h"
 
+// NimBLE Includes
+#include "host/ble_hs.h"
+#include "host/util/util.h"
+#include "nimble/nimble_port.h"
+#include "nimble/nimble_port_freertos.h"
+#include "services/gap/ble_svc_gap.h"
+#include "services/gatt/ble_svc_gatt.h"
+
 namespace bfox_beacon_system {
-
-static void gap_event(esp_gap_ble_cb_event_t event,
-                      esp_ble_gap_cb_param_t* param) {
-  BleDevice::GetInstance()->GapEvent(event, param);
-}
-
-static void gatts_event(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
-                        esp_ble_gatts_cb_param_t* param) {
-  BleDevice::GetInstance()->GattsEvent(event, gatts_if, param);
-}
 
 BleDevice* BleDevice::this_ = nullptr;
 
@@ -27,154 +27,174 @@ BleDevice* BleDevice::GetInstance() {
   return this_;
 }
 
-BleDevice::BleDevice() : services_(), adv_interval_ms_(100) {}
+BleDevice::BleDevice() : adv_interval_ms_(100) {}
 
 void BleDevice::Initialize(const std::string& device_name,
                            BleIBeacon& ibeacon_adv_data) {
-  // Initialize Bluetooth
-  ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
+  device_name_ = device_name;
+  ibeacon_adv_data_ = ibeacon_adv_data;
 
-  esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
-
-  esp_err_t ret = esp_bt_controller_init(&bt_cfg);
-  if (ret) {
-    ESP_LOGE(TAG, "%s initialize controller failed: %s", __func__,
-             esp_err_to_name(ret));
+  // Initialize NimBLE port
+  int rc = nimble_port_init();
+  if (rc != 0) {
+    ESP_LOGE(TAG, "nimble_port_init failed: %d", rc);
     return;
   }
 
-  ret = esp_bt_controller_enable(ESP_BT_MODE_BLE);
-  if (ret) {
-    ESP_LOGE(TAG, "%s enable controller failed: %s", __func__,
-             esp_err_to_name(ret));
-    return;
-  }
-  esp_bluedroid_config_t bluedroid_cfg = BT_BLUEDROID_INIT_CONFIG_DEFAULT();
-  ret = esp_bluedroid_init_with_cfg(&bluedroid_cfg);
-  if (ret) {
-    ESP_LOGE(TAG, "%s init bluetooth failed: %s", __func__,
-             esp_err_to_name(ret));
-    return;
-  }
-  ret = esp_bluedroid_enable();
-  if (ret) {
-    ESP_LOGE(TAG, "%s enable bluetooth failed: %s", __func__,
-             esp_err_to_name(ret));
-    return;
-  }
+  // Setup Host Callbacks
+  ble_hs_cfg.reset_cb = OnResetStatic;
+  ble_hs_cfg.sync_cb = OnSyncStatic;
+  ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
 
-  esp_err_t set_dev_name_ret = esp_ble_gap_set_device_name(device_name.c_str());
-  if (set_dev_name_ret) {
-    ESP_LOGE(TAG, "set device name failed, error code = %x", set_dev_name_ret);
+  // Initialize gap and gatt
+  ble_svc_gap_init();
+  ble_svc_gatt_init();
+
+  rc = ble_svc_gap_device_name_set(device_name_.c_str());
+  if (rc != 0) {
+    ESP_LOGE(TAG, "failed to set device name: %d", rc);
+  }
+}
+
+void BleDevice::RegisterServices(const struct ble_gatt_svc_def* svcs) {
+  int rc = ble_gatts_count_cfg(svcs);
+  if (rc != 0) {
+    ESP_LOGE(TAG, "ble_gatts_count_cfg failed: %d", rc);
     return;
   }
 
-  // GAP
-  ret = esp_ble_gap_register_callback(gap_event);
-  if (ret) {
-    ESP_LOGE(TAG, "gap register error, error code = %x", ret);
-    return;
-  }
-
-  // Set iBeacon Attribute Data
-  esp_ble_gap_config_adv_data_raw(reinterpret_cast<uint8_t*>(&ibeacon_adv_data),
-                                  sizeof(ibeacon_adv_data));
-
-  // GATT
-  static constexpr uint16_t LOCAL_MTU = 500;
-  esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(LOCAL_MTU);
-  if (local_mtu_ret) {
-    ESP_LOGE(TAG, "set local  MTU failed, error code = %x", local_mtu_ret);
-  }
-
-  ret = esp_ble_gatts_register_callback(gatts_event);
-  if (ret) {
-    ESP_LOGE(TAG, "gatts register error, error code = %x", ret);
+  rc = ble_gatts_add_svcs(svcs);
+  if (rc != 0) {
+    ESP_LOGE(TAG, "ble_gatts_add_svcs failed: %d", rc);
     return;
   }
 }
 
-void BleDevice::AddService(BleServiceInterfaceSharedPtr bleService) {
-  services_.push_back(bleService);
-
-  esp_err_t ret = esp_ble_gatts_app_register(bleService->GetAppId());
-  if (ret) {
-    ESP_LOGE(TAG, "gatts app register error, error code = %x", ret);
-    return;
-  }
+void BleDevice::StartHost() {
+  nimble_port_freertos_init(HostTaskStatic);
 }
 
-void BleDevice::GapEvent(esp_gap_ble_cb_event_t event,
-                         esp_ble_gap_cb_param_t* param) {
-  if (event == ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT) {
-  } else if (event == ESP_GAP_BLE_ADV_START_COMPLETE_EVT) {
-    // advertising start complete event to indicate advertising start
-    // successfully or failed
-    if (param->adv_start_cmpl.status != ESP_BT_STATUS_SUCCESS) {
-      ESP_LOGE(TAG, "Advertising start failed");
-    }
-  } else if (event == ESP_GAP_BLE_ADV_STOP_COMPLETE_EVT) {
-    if (param->adv_stop_cmpl.status != ESP_BT_STATUS_SUCCESS) {
-      ESP_LOGE(TAG, "Advertising stop failed");
-    } else {
-      ESP_LOGI(TAG, "Stop adv successfully");
-    }
-  } else if (event == ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT) {
-    ESP_LOGI(
-        TAG,
-        "update connection params status = %d, min_int = %d, max_int = "
-        "%d,conn_int = %d,latency = %d, timeout = %d",
-        param->update_conn_params.status, param->update_conn_params.min_int,
-        param->update_conn_params.max_int, param->update_conn_params.conn_int,
-        param->update_conn_params.latency, param->update_conn_params.timeout);
-  } else {
-    ESP_LOGI(TAG, "GAP Event %d", event);
-  }
+void BleDevice::HostTaskStatic(void* param) {
+  BleDevice::GetInstance()->HostTask();
 }
 
-void BleDevice::GattsEvent(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
-                           esp_ble_gatts_cb_param_t* param) {
-  if (event == ESP_GATTS_REG_EVT) {
-    if (param->reg.status == ESP_GATT_OK) {
-      for (const auto& bleService : services_) {
-        if (bleService->GetAppId() == param->reg.app_id) {
-          bleService->SetGattsIf(gatts_if);
-        }
-      }
-    } else {
-      ESP_LOGI(TAG, "Reg app failed, app_id %04x, status %d", param->reg.app_id,
-               param->reg.status);
-      return;
-    }
-  }
+void BleDevice::HostTask() {
+  ESP_LOGI(TAG, "NimBLE host task started");
+  nimble_port_run();
+  nimble_port_freertos_deinit();
+}
 
-  for (const auto& bleService : services_) {
-    if (gatts_if == ESP_GATT_IF_NONE || gatts_if == bleService->GetGattsIf()) {
-      bleService->GattsEvent(event, gatts_if, param);
-    }
+void BleDevice::OnSyncStatic() {
+  BleDevice::GetInstance()->OnSync();
+}
+
+void BleDevice::OnSync() {
+  ESP_LOGI(TAG, "NimBLE host synced");
+
+  // We start advertising after sync
+  RestartAdvertising();
+}
+
+void BleDevice::OnResetStatic(int reason) {
+  BleDevice::GetInstance()->OnReset(reason);
+}
+
+void BleDevice::OnReset(int reason) {
+  ESP_LOGE(TAG, "NimBLE host reset, reason: %d", reason);
+}
+
+int BleDevice::GapEventStatic(struct ble_gap_event* event, void* arg) {
+  return BleDevice::GetInstance()->GapEvent(event, arg);
+}
+
+int BleDevice::GapEvent(struct ble_gap_event* event, void* arg) {
+  switch (event->type) {
+    case BLE_GAP_EVENT_CONNECT:
+      ESP_LOGI(TAG, "BLE_GAP_EVENT_CONNECT status: %d",
+               event->connect.status);
+      // Connection state changed. Restart advertising to keep iBeacon alive
+      // while connected.
+      RestartAdvertising();
+      break;
+
+    case BLE_GAP_EVENT_DISCONNECT:
+      ESP_LOGI(TAG, "BLE_GAP_EVENT_DISCONNECT reason: %d",
+               event->disconnect.reason);
+      RestartAdvertising();
+      break;
+
+    case BLE_GAP_EVENT_ADV_COMPLETE:
+      ESP_LOGI(TAG, "BLE_GAP_EVENT_ADV_COMPLETE reason: %d",
+               event->adv_complete.reason);
+      RestartAdvertising();
+      break;
+
+    case BLE_GAP_EVENT_SUBSCRIBE:
+      ESP_LOGI(TAG, "BLE_GAP_EVENT_SUBSCRIBE conn_handle=%d",
+               event->subscribe.conn_handle);
+      break;
+
+    case BLE_GAP_EVENT_MTU:
+      ESP_LOGI(TAG, "BLE_GAP_EVENT_MTU conn_handle=%d mtu=%d",
+               event->mtu.conn_handle, event->mtu.value);
+      break;
   }
+  return 0;
 }
 
 void BleDevice::StartAdvertising(uint16_t interval_ms) {
   adv_interval_ms_ = interval_ms;
-  // BLE adv interval unit: N * 0.625ms (range 0x0020 - 0x4000)
-  // Clamp to valid range [32, 16384] = [20ms, 10240ms]
-  const uint16_t n =
-      static_cast<uint16_t>(static_cast<uint32_t>(interval_ms) * 8 / 5);
-  const uint16_t adv_int =
-      (n < 0x0020) ? 0x0020 : (n > 0x4000) ? 0x4000 : n;
-  ESP_LOGI(TAG, "StartAdvertising interval:%dms (0x%04X)", interval_ms, adv_int);
-  esp_ble_adv_params_t adv_params = {
-      .adv_int_min = adv_int,
-      .adv_int_max = adv_int,
-      .adv_type = ADV_TYPE_IND,
-      .own_addr_type = BLE_ADDR_TYPE_PUBLIC,
-      .peer_addr = {},
-      .peer_addr_type = BLE_ADDR_TYPE_PUBLIC,
-      .channel_map = ADV_CHNL_ALL,
-      .adv_filter_policy = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY,
-  };
-  esp_ble_gap_start_advertising(&adv_params);
+
+  // Use the raw iBeacon structure directly, matching Bluedroid behavior exactly
+  int rc = ble_gap_adv_set_data(reinterpret_cast<uint8_t*>(&ibeacon_adv_data_),
+                                sizeof(ibeacon_adv_data_));
+  if (rc != 0) {
+    ESP_LOGE(TAG, "ble_gap_adv_set_data failed: %d", rc);
+    return;
+  }
+
+  // Clear scan response data to prevent any interference with iBeacon strictness
+  ble_gap_adv_rsp_set_data(nullptr, 0);
+
+  // Begin advertising
+  struct ble_gap_adv_params adv_params;
+  memset(&adv_params, 0, sizeof(adv_params));
+  adv_params.conn_mode = BLE_GAP_CONN_MODE_UND;
+  adv_params.disc_mode = BLE_GAP_DISC_MODE_GEN;
+  
+  // interval_ms unit is 0.625ms (n * 0.625 = interval_ms) => n = interval_ms * 1.6
+  uint16_t n = static_cast<uint16_t>(interval_ms * 1.6f);
+  adv_params.itvl_min = n;
+  adv_params.itvl_max = n;
+
+  // Check if own address is available before starting
+  uint8_t own_addr_type;
+  rc = ble_hs_id_infer_auto(0, &own_addr_type);
+  if (rc != 0) {
+    ESP_LOGE(TAG, "ble_hs_id_infer_auto failed: %d", rc);
+    return;
+  }
+
+  rc = ble_gap_adv_start(own_addr_type, NULL, BLE_HS_FOREVER,
+                         &adv_params, GapEventStatic, NULL);
+  if (rc != 0) {
+    if (rc == BLE_HS_EALREADY) {
+      // Already advertising, no need to log as error
+      return;
+    }
+    // If connectable advertising fails (e.g. max connections reached), fallback to non-connectable
+    ESP_LOGW(TAG, "Connectable adv failed (%d). Fallback to non-connectable.", rc);
+    adv_params.conn_mode = BLE_GAP_CONN_MODE_NON;
+    adv_params.disc_mode = BLE_GAP_DISC_MODE_NON;
+    rc = ble_gap_adv_start(own_addr_type, NULL, BLE_HS_FOREVER,
+                           &adv_params, GapEventStatic, NULL);
+    if (rc != 0) {
+      ESP_LOGE(TAG, "ble_gap_adv_start fallback failed: %d", rc);
+      return;
+    }
+  }
+  
+  ESP_LOGI(TAG, "Started NimBLE advertising");
 }
 
 void BleDevice::RestartAdvertising() {

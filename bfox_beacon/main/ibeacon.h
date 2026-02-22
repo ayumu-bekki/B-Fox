@@ -2,9 +2,12 @@
 #define BFOX_BEACON_MAIN_IBEACON_H_
 // ESP32 B-Fox Beacon
 // (C)2025 bekki.jp
-#include <esp_bt_defs.h>
-
+#include <cstdint>
 #include <cstring>
+
+#ifndef ESP_UUID_LEN_128
+#define ESP_UUID_LEN_128 16
+#endif
 
 namespace bfox_beacon_system {
 

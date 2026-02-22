@@ -5,7 +5,7 @@
 #include <driver/rtc_io.h>
 #include <esp_adc/adc_cali.h>
 #include <esp_adc/adc_cali_scheme.h>
-#include <esp_gap_ble_api.h>
+#include <esp_bt.h>
 #include <esp_sleep.h>
 #include <esp_system.h>
 #include <nvs_flash.h>
@@ -116,83 +116,28 @@ void BFoxBeacon::Start() {
   }
 }
 
+static BleBFoxService* g_ble_bfox_service_ptr = nullptr;
+
 void BFoxBeacon::CreateBLEService() {
-  // Create BleVoltageCharacteristic : 53bf4a46-41ba-46a3-b675-4fb7f0770905
-  constexpr esp_gatt_char_prop_t voltage_char_property =
-      ESP_GATT_CHAR_PROP_BIT_READ;
-  constexpr uint8_t kVoltageCharacteristicUuidRaw[ESP_UUID_LEN_128] = {
-      // 128bit Little Endian
-      0x05, 0x09, 0x77, 0xF0, 0xB7, 0x4F, 0x75, 0xB6,
-      0xA3, 0x46, 0xBA, 0x41, 0x46, 0x4A, 0xBF, 0x53};
-  esp_bt_uuid_t voltage_characteristic_uuid = {.len = ESP_UUID_LEN_128,
-                                               .uuid = {.uuid128 = {}}};
-  std::memcpy(voltage_characteristic_uuid.uuid.uuid128,
-              kVoltageCharacteristicUuidRaw, ESP_UUID_LEN_128);
-  BleCharacteristicInterfaceSharedPtr ble_voltage_characteristic =
-      std::make_shared<BleVoltageCharacteristic>(
-          voltage_characteristic_uuid, voltage_char_property, weak_from_this());
-
-  // Create BleBeaconSettingCharacteristic
-  constexpr esp_gatt_char_prop_t beacon_setting_char_property =
-      ESP_GATT_CHAR_PROP_BIT_READ | ESP_GATT_CHAR_PROP_BIT_WRITE;
-  // 096a09d5-1b35-4c99-a483-8d0c34f70220
-  constexpr uint8_t kDemoCharacteristicUuidRaw[ESP_UUID_LEN_128] = {
-      // 128bit Little Endian
-      0x20, 0x02, 0xF7, 0x34, 0x0C, 0x8D, 0x83, 0xA4,
-      0x99, 0x4C, 0x35, 0x1B, 0xD5, 0x09, 0x6A, 0x09};
-  esp_bt_uuid_t beacon_setting_characteristic_uuid = {.len = ESP_UUID_LEN_128,
-                                                      .uuid = {.uuid128 = {}}};
-  std::memcpy(beacon_setting_characteristic_uuid.uuid.uuid128,
-              kDemoCharacteristicUuidRaw, ESP_UUID_LEN_128);
-  BleCharacteristicInterfaceSharedPtr ble_beacon_setting_characteristic =
-      std::make_shared<BleBeaconSettingCharacteristic>(
-          beacon_setting_characteristic_uuid, beacon_setting_char_property,
-          weak_from_this());
-
-  // Create BleDeepSleepCharacteristic : 0cf26a7e-650e-4c18-9a30-bbbca50d88c1
-  constexpr esp_gatt_char_prop_t deep_sleep_char_property =
-      ESP_GATT_CHAR_PROP_BIT_WRITE;
-  constexpr uint8_t kDeepSleepCharacteristicUuidRaw[ESP_UUID_LEN_128] = {
-      // 128bit Little Endian
-      0xC1, 0x88, 0x0D, 0xA5, 0xBC, 0xBB, 0x30, 0x9A,
-      0x18, 0x4C, 0x0E, 0x65, 0x7E, 0x6A, 0xF2, 0x0C};
-  esp_bt_uuid_t deep_sleep_characteristic_uuid = {.len = ESP_UUID_LEN_128,
-                                                  .uuid = {.uuid128 = {}}};
-  std::memcpy(deep_sleep_characteristic_uuid.uuid.uuid128,
-              kDeepSleepCharacteristicUuidRaw, ESP_UUID_LEN_128);
-  BleCharacteristicInterfaceSharedPtr ble_deep_sleep_characteristic =
-      std::make_shared<BleDeepSleepCharacteristic>(
-          deep_sleep_characteristic_uuid, deep_sleep_char_property,
-          weak_from_this());
-
-  // Create BleBFoxService 347fd67c-9131-4ea0-b0a7-1886d8c0f0df
-  constexpr uint8_t kServiceUuidRaw[ESP_UUID_LEN_128] = {
-      // 128bit Little Endian
-      0xDF, 0xF0, 0xC0, 0xD8, 0x86, 0x18, 0xA7, 0xB0,
-      0xA0, 0x4E, 0x31, 0x91, 0x7C, 0xD6, 0x7F, 0x34};
-
-  esp_bt_uuid_t service_uuid = {.len = ESP_UUID_LEN_128,
-                                .uuid = {.uuid128 = {}}};
-  std::memcpy(service_uuid.uuid.uuid128, kServiceUuidRaw, ESP_UUID_LEN_128);
-  BleServiceInterfaceSharedPtr ble_BFOX_service =
-      std::make_shared<BleBFoxService>(0, service_uuid, 10);
-  ble_BFOX_service->AddCharacteristic(ble_voltage_characteristic);
-  ble_BFOX_service->AddCharacteristic(ble_beacon_setting_characteristic);
-  ble_BFOX_service->AddCharacteristic(ble_deep_sleep_characteristic);
+  // Create BleBFoxService
+  g_ble_bfox_service_ptr = new BleBFoxService(weak_from_this());
 
   // create iBeacon Adv data
   BleIBeacon ibeacon_adv_data =
       CreateIBeaconAttr(kBFoxIBeaconProximityUuid, setting_->GetMajor(),
                         setting_->GetMinor(), setting_->GetMeasuredPower());
 
-  // Start Bletooth Low Energy
+  // Start Bluetooth Low Energy (NimBLE)
   BleDevice* const ble_device = BleDevice::GetInstance();
   ble_device->Initialize(setting_->GetDeviceName(), ibeacon_adv_data);
-  ble_device->AddService(ble_BFOX_service);
-  ble_device->StartAdvertising(setting_->GetAdvIntervalMs());
-
+  ble_device->RegisterServices(g_ble_bfox_service_ptr->GetServiceDefs());
+  
+  // Set TX power (controller-level API, works with NimBLE)
   esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_DEFAULT,
                        setting_->GetEspTxPowerLevel());
+  
+  // Start NimBLE host task
+  ble_device->StartHost();
 }
 
 float BFoxBeacon::GetBatteryVoltage() const {

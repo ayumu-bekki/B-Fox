@@ -17,18 +17,32 @@
 #include "logger.h"
 #include "util.h"
 
+// NimBLE Includes
+#include "host/ble_hs.h"
+#include "host/util/util.h"
+#include "services/gatt/ble_svc_gatt.h"
+
 namespace bfox_beacon_system {
 
 // Deep Sleep command code
 constexpr uint8_t kDeepSleepCommand = 0x01;
 
+// NimBLE UUID Definitions (Little Endian arrays as provided in original code)
+static const ble_uuid128_t gatt_svr_svc_bfox_uuid =
+    BLE_UUID128_INIT(0xDF, 0xF0, 0xC0, 0xD8, 0x86, 0x18, 0xA7, 0xB0, 0xA0, 0x4E, 0x31, 0x91, 0x7C, 0xD6, 0x7F, 0x34);
+
+static const ble_uuid128_t gatt_svr_chr_voltage_uuid =
+    BLE_UUID128_INIT(0x05, 0x09, 0x77, 0xF0, 0xB7, 0x4F, 0x75, 0xB6, 0xA3, 0x46, 0xBA, 0x41, 0x46, 0x4A, 0xBF, 0x53);
+
+static const ble_uuid128_t gatt_svr_chr_setting_uuid =
+    BLE_UUID128_INIT(0x20, 0x02, 0xF7, 0x34, 0x0C, 0x8D, 0x83, 0xA4, 0x99, 0x4C, 0x35, 0x1B, 0xD5, 0x09, 0x6A, 0x09);
+
+static const ble_uuid128_t gatt_svr_chr_sleep_uuid =
+    BLE_UUID128_INIT(0xC1, 0x88, 0x0D, 0xA5, 0xBC, 0xBB, 0x30, 0x9A, 0x18, 0x4C, 0x0E, 0x65, 0x7E, 0x6A, 0xF2, 0x0C);
+
 BleVoltageCharacteristic::BleVoltageCharacteristic(
-    esp_bt_uuid_t characteristic_uuid, esp_gatt_char_prop_t property,
     const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface)
-    : BleCharacteristicInterface(),
-      characteristic_uuid_(characteristic_uuid),
-      property_(property),
-      bfox_beacon_interface_(bfox_beacon_interface) {}
+    : bfox_beacon_interface_(bfox_beacon_interface) {}
 
 void BleVoltageCharacteristic::Read(std::vector<uint8_t>* const data) {
   BFoxBeaconInterfaceSharedPtr bfox_beacon = bfox_beacon_interface_.lock();
@@ -43,31 +57,12 @@ void BleVoltageCharacteristic::Read(std::vector<uint8_t>* const data) {
   data->insert(data->begin(), payload.begin(), payload.end());
 }
 
-void BleVoltageCharacteristic::SetHandle(const uint16_t handle) {
-  handle_ = handle;
-}
-
-uint16_t BleVoltageCharacteristic::GetHandle() const { return handle_; }
-
-esp_bt_uuid_t BleVoltageCharacteristic::GetUuid() const {
-  return characteristic_uuid_;
-}
-
-esp_gatt_char_prop_t BleVoltageCharacteristic::GetProperty() const {
-  return property_;
-}
-
 BleBeaconSettingCharacteristic::BleBeaconSettingCharacteristic(
-    esp_bt_uuid_t characteristic_uuid, esp_gatt_char_prop_t property,
     const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface)
-    : BleCharacteristicInterface(),
-      characteristic_uuid_(characteristic_uuid),
-      property_(property),
-      bfox_beacon_interface_(bfox_beacon_interface) {}
+    : bfox_beacon_interface_(bfox_beacon_interface) {}
 
 void BleBeaconSettingCharacteristic::Write(
     const std::vector<uint8_t>* const data) {
-  // esp_log_buffer_hex(TAG, data->data(), data->size());
   if (data->size() <= 0) {
     return;
   }
@@ -154,27 +149,9 @@ void BleBeaconSettingCharacteristic::Read(std::vector<uint8_t>* const data) {
   data->insert(data->end(), payload.begin(), payload.end());
 }
 
-void BleBeaconSettingCharacteristic::SetHandle(const uint16_t handle) {
-  handle_ = handle;
-}
-
-uint16_t BleBeaconSettingCharacteristic::GetHandle() const { return handle_; }
-
-esp_bt_uuid_t BleBeaconSettingCharacteristic::GetUuid() const {
-  return characteristic_uuid_;
-}
-
-esp_gatt_char_prop_t BleBeaconSettingCharacteristic::GetProperty() const {
-  return property_;
-}
-
 BleDeepSleepCharacteristic::BleDeepSleepCharacteristic(
-    esp_bt_uuid_t characteristic_uuid, esp_gatt_char_prop_t property,
     const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface)
-    : BleCharacteristicInterface(),
-      characteristic_uuid_(characteristic_uuid),
-      property_(property),
-      bfox_beacon_interface_(bfox_beacon_interface) {}
+    : bfox_beacon_interface_(bfox_beacon_interface) {}
 
 void BleDeepSleepCharacteristic::Write(const std::vector<uint8_t>* const data) {
   if (data->size() <= 0) {
@@ -196,179 +173,104 @@ void BleDeepSleepCharacteristic::Write(const std::vector<uint8_t>* const data) {
   }
 }
 
-void BleDeepSleepCharacteristic::SetHandle(const uint16_t handle) {
-  handle_ = handle;
+// NimBLE static instance pointer for callback access
+static BleBFoxService* g_ble_bfox_service_inst = nullptr;
+
+BleBFoxService::BleBFoxService(
+    const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface)
+    : voltage_char_(std::make_shared<BleVoltageCharacteristic>(bfox_beacon_interface)),
+      setting_char_(std::make_shared<BleBeaconSettingCharacteristic>(bfox_beacon_interface)),
+      sleep_char_(std::make_shared<BleDeepSleepCharacteristic>(bfox_beacon_interface)) {
+  g_ble_bfox_service_inst = this;
 }
 
-uint16_t BleDeepSleepCharacteristic::GetHandle() const { return handle_; }
-
-esp_bt_uuid_t BleDeepSleepCharacteristic::GetUuid() const {
-  return characteristic_uuid_;
-}
-
-esp_gatt_char_prop_t BleDeepSleepCharacteristic::GetProperty() const {
-  return property_;
-}
-
-BleBFoxService::BleBFoxService(const uint16_t app_id,
-                               esp_bt_uuid_t service_uuid,
-                               const uint16_t handle_num)
-    : BleServiceInterface(),
-      app_id_(app_id),
-      gatts_if_(0),
-      gatts_handle_num_(
-          handle_num)  // Number of required handles (number of attributes)
-      ,
-      service_uuid_(service_uuid),
-      characteristics_() {}
-
-void BleBFoxService::GattsEvent(esp_gatts_cb_event_t event,
-                                esp_gatt_if_t gatts_if,
-                                esp_ble_gatts_cb_param_t* param) {
-  if (event == ESP_GATTS_REG_EVT) {
-    ESP_LOGI(TAG, "REGISTER_APP_EVT, status %d, app_id %d", param->reg.status,
-             param->reg.app_id);
-
-    esp_gatt_srvc_id_t service_id = {
-        .id = {.uuid = service_uuid_, .inst_id = 0x00}, .is_primary = true};
-    esp_ble_gatts_create_service(gatts_if, &service_id, gatts_handle_num_);
-
-  } else if (event == ESP_GATTS_READ_EVT) {
-    ESP_LOGI(TAG, "GATT_READ_EVT, conn_id %d, trans_id %" PRIu32 ", handle %d",
-             param->read.conn_id, param->read.trans_id, param->read.handle);
-
-    for (const auto& bleCharacteristic : characteristics_) {
-      if (bleCharacteristic->GetHandle() == param->read.handle) {
-        std::vector<uint8_t> data;
-        bleCharacteristic->Read(&data);
-
-        esp_gatt_rsp_t rsp = {
-            .attr_value = {.value = {},
-                           .handle = param->read.handle,
-                           .offset = 0,
-                           .len = static_cast<uint16_t>(data.size()),
-                           .auth_req = 0}};
-        std::memcpy(rsp.attr_value.value, data.data(), data.size());
-        esp_ble_gatts_send_response(gatts_if, param->read.conn_id,
-                                    param->read.trans_id, ESP_GATT_OK, &rsp);
-      }
-    }
-
-  } else if (event == ESP_GATTS_WRITE_EVT) {
-    ESP_LOGI(TAG,
-             "GATT_WRITE_EVT, conn_id %d, trans_id %" PRIu32
-             ", handle %d, need_resp %d",
-             param->write.conn_id, param->write.trans_id, param->write.handle,
-             param->write.need_rsp ? 1 : 0);
-
-    for (const auto& bleCharacteristic : characteristics_) {
-      if (bleCharacteristic->GetHandle() == param->write.handle) {
-        std::vector<uint8_t> data(param->write.value,
-                                  param->write.value + param->write.len);
-        bleCharacteristic->Write(&data);
-      }
-    }
-
-    if (param->write.need_rsp) {
-      esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
-                                  param->write.trans_id, ESP_GATT_OK, nullptr);
-    }
-
-  } else if (event == ESP_GATTS_MTU_EVT) {
-    ESP_LOGI(TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
-
-  } else if (event == ESP_GATTS_CREATE_EVT) {
-    ESP_LOGI(TAG, "CREATE_SERVICE_EVT, status %d,  service_handle %d",
-             param->create.status, param->create.service_handle);
-    const uint16_t service_handle = param->create.service_handle;
-    esp_ble_gatts_start_service(service_handle);
-
-    for (const auto& bleCharacteristic : characteristics_) {
-      esp_bt_uuid_t uuid = bleCharacteristic->GetUuid();
-      esp_err_t add_char_ret = esp_ble_gatts_add_char(
-          service_handle, &uuid, ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
-          bleCharacteristic->GetProperty(), nullptr, nullptr);
-      if (add_char_ret) {
-        ESP_LOGE(TAG, "add char failed, error code =%x", add_char_ret);
-      }
-    }
-
-  } else if (event == ESP_GATTS_ADD_CHAR_EVT) {
-    ESP_LOGI(TAG, "GATTS_ADD_CHAR_EVT, status %d, service_handle %d",
-             param->start.status, param->start.service_handle);
-    if (param->start.status != 0) {
-      ESP_LOGE(TAG, "Failed Add Char Event");
-      return;
-    }
-
-    for (const auto& bleCharacteristic : characteristics_) {
-      esp_bt_uuid_t uuid = bleCharacteristic->GetUuid();
-      if (std::memcmp(&uuid, &param->add_char.char_uuid,
-                      sizeof(param->add_char.char_uuid)) == 0) {
-        ESP_LOGI(TAG, "Set Characteristic Handle, handle:%d",
-                 param->start.service_handle);
-        bleCharacteristic->SetHandle(param->start.service_handle);
-      }
-    }
-
-  } else if (event == ESP_GATTS_START_EVT) {
-    ESP_LOGI(TAG, "SERVICE_START_EVT, status %d, service_handle %d",
-             param->start.status, param->start.service_handle);
-
-  } else if (event == ESP_GATTS_CONNECT_EVT) {
-    ESP_LOGI(TAG,
-             "ESP_GATTS_CONNECT_EVT, conn_id %d, remote "
-             "%02x:%02x:%02x:%02x:%02x:%02x:",
-             param->connect.conn_id, param->connect.remote_bda[0],
-             param->connect.remote_bda[1], param->connect.remote_bda[2],
-             param->connect.remote_bda[3], param->connect.remote_bda[4],
-             param->connect.remote_bda[5]);
-
-    esp_ble_conn_update_params_t conn_params = {
-        .bda = {},        // Bluetooth device address
-        .min_int = 0x10,  // Min connection interval 0x10 * 1.25ms = 20ms
-        .max_int = 0x20,  // Max connection interval 0x20 * 1.25ms = 40ms
-        .latency = 0,     // Slave latency for the connection in number of
-                          // connection events. Range: 0x0000 to 0x01F3
-        .timeout = 1000,  // Supervision timeout for the LE Link. (Range:0 -
-                          // 3200) (X * 10msec) 1000 = 10s
-    };
-    std::memcpy(conn_params.bda, param->connect.remote_bda,
-                sizeof(esp_bd_addr_t));
-    esp_ble_gap_update_conn_params(&conn_params);
-
-  } else if (event == ESP_GATTS_DISCONNECT_EVT) {
-    ESP_LOGI(TAG, "ESP_GATTS_DISCONNECT_EVT, disconnect reason 0x%x",
-             param->disconnect.reason);
-    BleDevice::GetInstance()->RestartAdvertising();
-
-  } else if (event == ESP_GATTS_CONF_EVT) {
-    ESP_LOGI(TAG, "ESP_GATTS_CONF_EVT, status %d attr_handle %d",
-             param->conf.status, param->conf.handle);
-    if (param->conf.status != ESP_GATT_OK) {
-      // esp_log_buffer_hex(TAG, param->conf.value, param->conf.len);
-    }
-
-  } else if (event == ESP_GATTS_RESPONSE_EVT) {
-    // ESP_LOGI(TAG, "GATTS_RESPONSE_EVT, status %d service_handle %d",
-    // param->conf.status, param->start.service_handle);
-  } else {
-    ESP_LOGI(TAG, "EVENT %d, status %d, service_handle %d", event,
-             param->start.status, param->start.service_handle);
+int BleBFoxService::GattSvrChrAccessStatic(uint16_t conn_handle, uint16_t attr_handle,
+                                           struct ble_gatt_access_ctxt* ctxt,
+                                           void* arg) {
+  if (g_ble_bfox_service_inst) {
+    return g_ble_bfox_service_inst->GattSvrChrAccess(conn_handle, attr_handle, ctxt, arg);
   }
+  return BLE_ATT_ERR_UNLIKELY;
 }
 
-void BleBFoxService::AddCharacteristic(
-    BleCharacteristicInterfaceSharedPtr bleCharacteristic) {
-  characteristics_.push_back(bleCharacteristic);
+int BleBFoxService::GattSvrChrAccess(uint16_t conn_handle, uint16_t attr_handle,
+                                     struct ble_gatt_access_ctxt* ctxt, void* arg) {
+  const ble_uuid_t* uuid = ctxt->chr->uuid;
+
+  if (ble_uuid_cmp(uuid, &gatt_svr_chr_voltage_uuid.u) == 0) {
+    if (ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR) {
+      std::vector<uint8_t> data;
+      voltage_char_->Read(&data);
+      int rc = os_mbuf_append(ctxt->om, data.data(), data.size());
+      return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
+    }
+  } else if (ble_uuid_cmp(uuid, &gatt_svr_chr_setting_uuid.u) == 0) {
+    if (ctxt->op == BLE_GATT_ACCESS_OP_READ_CHR) {
+      std::vector<uint8_t> data;
+      setting_char_->Read(&data);
+      int rc = os_mbuf_append(ctxt->om, data.data(), data.size());
+      return rc == 0 ? 0 : BLE_ATT_ERR_INSUFFICIENT_RES;
+    } else if (ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR) {
+      uint16_t len = OS_MBUF_PKTLEN(ctxt->om);
+      std::vector<uint8_t> data(len);
+      int rc = ble_hs_mbuf_to_flat(ctxt->om, data.data(), len, NULL);
+      if (rc == 0) {
+        setting_char_->Write(&data);
+      }
+      return rc == 0 ? 0 : BLE_ATT_ERR_INVALID_ATTR_VALUE_LEN;
+    }
+  } else if (ble_uuid_cmp(uuid, &gatt_svr_chr_sleep_uuid.u) == 0) {
+    if (ctxt->op == BLE_GATT_ACCESS_OP_WRITE_CHR) {
+      uint16_t len = OS_MBUF_PKTLEN(ctxt->om);
+      std::vector<uint8_t> data(len);
+      int rc = ble_hs_mbuf_to_flat(ctxt->om, data.data(), len, NULL);
+      if (rc == 0) {
+        sleep_char_->Write(&data);
+      }
+      return rc == 0 ? 0 : BLE_ATT_ERR_INVALID_ATTR_VALUE_LEN;
+    }
+  }
+
+  return BLE_ATT_ERR_UNLIKELY;
 }
 
-void BleBFoxService::SetGattsIf(const uint16_t gatts_if) {
-  gatts_if_ = gatts_if;
+// NimBLE GATT service definition array
+// Must be static to persist throughout NimBLE's lifecycle
+static const struct ble_gatt_svc_def gatt_svr_svcs[] = {
+    {
+        .type = BLE_GATT_SVC_TYPE_PRIMARY,
+        .uuid = &gatt_svr_svc_bfox_uuid.u,
+        .characteristics = (struct ble_gatt_chr_def[]) {
+            {
+                // Voltage Char
+                .uuid = &gatt_svr_chr_voltage_uuid.u,
+                .access_cb = BleBFoxService::GattSvrChrAccessStatic,
+                .flags = BLE_GATT_CHR_F_READ,
+            },
+            {
+                // Setting Char
+                .uuid = &gatt_svr_chr_setting_uuid.u,
+                .access_cb = BleBFoxService::GattSvrChrAccessStatic,
+                .flags = BLE_GATT_CHR_F_READ | BLE_GATT_CHR_F_WRITE,
+            },
+            {
+                // Deep Sleep Char
+                .uuid = &gatt_svr_chr_sleep_uuid.u,
+                .access_cb = BleBFoxService::GattSvrChrAccessStatic,
+                .flags = BLE_GATT_CHR_F_WRITE,
+            },
+            {
+                0, // No more characteristics in this service
+            }
+        },
+    },
+    {
+        0, // No more services
+    },
+};
+
+const struct ble_gatt_svc_def* BleBFoxService::GetServiceDefs() {
+  return gatt_svr_svcs;
 }
-
-uint16_t BleBFoxService::GetAppId() const { return app_id_; }
-
-uint16_t BleBFoxService::GetGattsIf() const { return gatts_if_; }
 
 }  // namespace bfox_beacon_system

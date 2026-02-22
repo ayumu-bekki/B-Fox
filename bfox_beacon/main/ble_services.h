@@ -3,104 +3,84 @@
 // ESP32 B-Fox Beacon
 // (C)2025 bekki.jp
 
-#include <esp_bt.h>
-#include <esp_bt_defs.h>
-#include <esp_bt_main.h>
-#include <esp_gap_ble_api.h>
-#include <esp_gatt_common_api.h>
-#include <esp_gatts_api.h>
-
+#include <memory>
 #include <vector>
 
 #include "bfox_beacon_interface.h"
-#include "ble_device.h"
+
+// Forward declare for NimBLE
+struct ble_gatt_svc_def;
+struct ble_gatt_access_ctxt;
 
 namespace bfox_beacon_system {
 
+class BleCharacteristicInterface {
+ public:
+  virtual ~BleCharacteristicInterface() {}
+
+  virtual void Write(const std::vector<uint8_t>* const data) = 0;
+  virtual void Read(std::vector<uint8_t>* const data) = 0;
+};
+
+using BleCharacteristicInterfaceSharedPtr =
+    std::shared_ptr<BleCharacteristicInterface>;
+
 class BleVoltageCharacteristic final : public BleCharacteristicInterface {
  public:
-  BleVoltageCharacteristic(
-      esp_bt_uuid_t characteristic_uuid, esp_gatt_char_prop_t property,
+  explicit BleVoltageCharacteristic(
       const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface);
 
   void Write(const std::vector<uint8_t>* const data) override {};
   void Read(std::vector<uint8_t>* const data) override;
 
-  void SetHandle(const uint16_t handle) override;
-  uint16_t GetHandle() const override;
-  esp_bt_uuid_t GetUuid() const override;
-  esp_gatt_char_prop_t GetProperty() const override;
-
  private:
-  const esp_bt_uuid_t characteristic_uuid_;
-  const esp_gatt_char_prop_t property_;
-  uint16_t handle_;
   const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface_;
 };
 
 class BleBeaconSettingCharacteristic final : public BleCharacteristicInterface {
  public:
-  BleBeaconSettingCharacteristic(
-      esp_bt_uuid_t characteristic_uuid, esp_gatt_char_prop_t property,
+  explicit BleBeaconSettingCharacteristic(
       const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface);
 
   void Write(const std::vector<uint8_t>* const data) override;
   void Read(std::vector<uint8_t>* const data) override;
 
-  void SetHandle(const uint16_t handle) override;
-  uint16_t GetHandle() const override;
-  esp_bt_uuid_t GetUuid() const override;
-  esp_gatt_char_prop_t GetProperty() const override;
-
  private:
-  const esp_bt_uuid_t characteristic_uuid_;
-  const esp_gatt_char_prop_t property_;
-  uint16_t handle_;
   const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface_;
 };
 
 class BleDeepSleepCharacteristic final : public BleCharacteristicInterface {
  public:
-  BleDeepSleepCharacteristic(
-      esp_bt_uuid_t characteristic_uuid, esp_gatt_char_prop_t property,
+  explicit BleDeepSleepCharacteristic(
       const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface);
 
   void Write(const std::vector<uint8_t>* const data) override;
   void Read(std::vector<uint8_t>* const data) override {};
 
-  void SetHandle(const uint16_t handle) override;
-  uint16_t GetHandle() const override;
-  esp_bt_uuid_t GetUuid() const override;
-  esp_gatt_char_prop_t GetProperty() const override;
-
  private:
-  const esp_bt_uuid_t characteristic_uuid_;
-  const esp_gatt_char_prop_t property_;
-  uint16_t handle_;
   const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface_;
 };
 
-class BleBFoxService final : public BleServiceInterface {
+class BleBFoxService final {
  public:
-  BleBFoxService(const uint16_t app_id, esp_bt_uuid_t service_uuid,
-                 const uint16_t handle_num);
+  explicit BleBFoxService(
+      const BFoxBeaconInterfaceWeakPtr bfox_beacon_interface);
+
+  // Return the NimBLE GATT service definition array
+  const struct ble_gatt_svc_def* GetServiceDefs();
+
+  static int GattSvrChrAccessStatic(uint16_t conn_handle, uint16_t attr_handle,
+                                    struct ble_gatt_access_ctxt* ctxt,
+                                    void* arg);
 
  private:
-  void GattsEvent(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
-                  esp_ble_gatts_cb_param_t* param) override;
-  void AddCharacteristic(
-      BleCharacteristicInterfaceSharedPtr bleCharacteristic) override;
-
-  void SetGattsIf(const uint16_t gatts_if) override;
-  uint16_t GetAppId() const override;
-  uint16_t GetGattsIf() const override;
+  int GattSvrChrAccess(uint16_t conn_handle, uint16_t attr_handle,
+                       struct ble_gatt_access_ctxt* ctxt, void* arg);
 
  private:
-  const uint16_t app_id_;
-  uint16_t gatts_if_;
-  uint16_t gatts_handle_num_;
-  esp_bt_uuid_t service_uuid_;
-  std::vector<BleCharacteristicInterfaceSharedPtr> characteristics_;
+  BleCharacteristicInterfaceSharedPtr voltage_char_;
+  BleCharacteristicInterfaceSharedPtr setting_char_;
+  BleCharacteristicInterfaceSharedPtr sleep_char_;
 };
 
 }  // namespace bfox_beacon_system
