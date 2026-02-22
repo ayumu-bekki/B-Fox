@@ -27,7 +27,7 @@ BleDevice* BleDevice::GetInstance() {
   return this_;
 }
 
-BleDevice::BleDevice() : adv_interval_ms_(100) {}
+BleDevice::BleDevice() : adv_interval_ms_(200) {}
 
 void BleDevice::Initialize(const std::string& device_name,
                            BleIBeacon& ibeacon_adv_data) {
