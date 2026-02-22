@@ -4,7 +4,6 @@
 // (C)2025 bekki.jp
 
 // Include ----------------------
-#include <esp_gap_ble_api.h>
 #include <soc/soc.h>
 
 #include <memory>
@@ -15,6 +14,8 @@
 #include "ble_beacon_item.h"
 #include "task.h"
 
+struct ble_gap_event;
+
 namespace bfox_receiver_system {
 
 class BeaconReceiveTask final : public Task {
@@ -22,7 +23,7 @@ class BeaconReceiveTask final : public Task {
   static constexpr const char* kTaskName = "BeaconReceiveTask";
   static constexpr int kPriority = Task::kPriorityLow;
   static constexpr int kCoreId = tskNO_AFFINITY;
-  static constexpr int64_t kBeaconExpiryMs = 2000;  // entries unseen for 2s are removed
+  static constexpr int64_t kBeaconExpiryMs = 3000;  // entries unseen for 3s are removed
 
  private:
   static BeaconReceiveTask* instance_;
@@ -35,13 +36,17 @@ class BeaconReceiveTask final : public Task {
 
   void Update() override;
 
-  void EventGap(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t* param);
-
   std::vector<BleBeaconItem> GetRSSISortedItems();
 
  private:
-  static void EventGapStatic(esp_gap_ble_cb_event_t event,
-                             esp_ble_gap_cb_param_t* param);
+  static void HostTaskStatic(void* param);
+  void HostTask();
+
+  static void OnSyncStatic();
+  void OnSync();
+
+  static int GapEventStatic(struct ble_gap_event* event, void* arg);
+  int GapEvent(struct ble_gap_event* event, void* arg);
 
   bool IsIBeaconPacket(const uint8_t* adv_data,
                        const uint8_t adv_data_len) const;

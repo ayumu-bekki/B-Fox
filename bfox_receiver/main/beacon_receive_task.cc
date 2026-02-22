@@ -4,12 +4,6 @@
 // Include ----------------------
 #include "beacon_receive_task.h"
 
-#include <esp_bt.h>
-#include <esp_bt_defs.h>
-#include <esp_bt_main.h>
-#include <esp_gap_ble_api.h>
-#include <esp_gatt_defs.h>
-#include <esp_gattc_api.h>
 #include <esp_timer.h>
 #include <freertos/FreeRTOS.h>
 
@@ -20,6 +14,12 @@
 #include "ibeacon.h"
 #include "logger.h"
 #include "util.h"
+
+// NimBLE Includes
+#include "host/ble_hs.h"
+#include "host/util/util.h"
+#include "nimble/nimble_port.h"
+#include "nimble/nimble_port_freertos.h"
 
 namespace bfox_receiver_system {
 
@@ -37,31 +37,18 @@ BeaconReceiveTask::BeaconReceiveTask(const uint8_t target_proximity_uuid[16],
 }
 
 void BeaconReceiveTask::Initialize() {
-  esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
-
-  esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
-  esp_bt_controller_init(&bt_cfg);
-  esp_bt_controller_enable(ESP_BT_MODE_BLE);
-
-  esp_bluedroid_init();
-  esp_bluedroid_enable();
-
   instance_ = this;
-  esp_err_t status =
-      esp_ble_gap_register_callback(&BeaconReceiveTask::EventGapStatic);
-  if (status != ESP_OK) {
-    ESP_LOGE(kTag, "gap register error: %s", esp_err_to_name(status));
+
+  int rc = nimble_port_init();
+  if (rc != 0) {
+    ESP_LOGE(kTag, "nimble_port_init failed: %d", rc);
     return;
   }
 
-  esp_ble_scan_params_t ble_scan_params = {
-      .scan_type = BLE_SCAN_TYPE_PASSIVE,
-      .own_addr_type = BLE_ADDR_TYPE_PUBLIC,
-      .scan_filter_policy = BLE_SCAN_FILTER_ALLOW_ALL,
-      .scan_interval = 0x00A0,  // 160 * 0.625ms = 100ms
-      .scan_window = 0x00A0,    // 160 * 0.625ms = 100ms (continuous scan, duty cycle 100%)
-      .scan_duplicate = BLE_SCAN_DUPLICATE_DISABLE};
-  esp_ble_gap_set_scan_params(&ble_scan_params);
+  ble_hs_cfg.sync_cb = OnSyncStatic;
+  ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
+
+  nimble_port_freertos_init(HostTaskStatic);
 }
 
 void BeaconReceiveTask::Update() { util::SleepMillisecond(2000); }
@@ -89,84 +76,98 @@ std::vector<BleBeaconItem> BeaconReceiveTask::GetRSSISortedItems() {
   return ble_beacon_list;
 }
 
-void BeaconReceiveTask::EventGap(esp_gap_ble_cb_event_t event,
-                                 esp_ble_gap_cb_param_t* param) {
-  if (event == ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT) {
-    // the unit of the duration is second, 0 means scan permanently
-    uint32_t duration = 0;
-    esp_ble_gap_start_scanning(duration);
-  } else if (event == ESP_GAP_BLE_SCAN_START_COMPLETE_EVT) {
-    esp_err_t err = param->scan_start_cmpl.status;
-    if (err != ESP_BT_STATUS_SUCCESS) {
-      ESP_LOGE(kTag, "Scanning start failed, error %s", esp_err_to_name(err));
-    } else {
-      ESP_LOGI(kTag, "Scanning start successfully");
-    }
-  } else if (event == ESP_GAP_BLE_SCAN_RESULT_EVT) {
-    if (param->scan_rst.search_evt == ESP_GAP_SEARCH_INQ_RES_EVT) {
-      if (IsIBeaconPacket(param->scan_rst.ble_adv,
-                          param->scan_rst.adv_data_len)) {
-        const BleIBeacon* ibeacon_data =
-            reinterpret_cast<const BleIBeacon*>(param->scan_rst.ble_adv);
-        const uint16_t major =
-            EndianChangeU16(ibeacon_data->ibeacon_vendor.major);
-        const uint16_t minor =
-            EndianChangeU16(ibeacon_data->ibeacon_vendor.minor);
-        /*
-                ESP_LOGI(kTag, "iBeacon > major:0x%04x(%d) minor:0x%04x(%d)
-           measured_power:%ddBm rssi:%ddBm", major, major, minor, minor,
-                         ibeacon_data->ibeacon_vendor.measured_power,
-                         param->scan_rst.rssi);
-        */
-        if (std::memcmp(ibeacon_data->ibeacon_vendor.proximity_uuid,
-                        target_proximity_uuid_,
-                        sizeof(target_proximity_uuid_)) != 0 ||
-            major != target_major_id_) {
-          return;
-        }
+void BeaconReceiveTask::HostTaskStatic(void* param) {
+  if (instance_) {
+    instance_->HostTask();
+  }
+}
 
-        BleBeaconItem item = {.minor = minor,
-                              .rssi = param->scan_rst.rssi,
-                              .last_seen_ms = esp_timer_get_time() / 1000};
+void BeaconReceiveTask::HostTask() {
+  ESP_LOGI(kTag, "NimBLE host task started");
+  nimble_port_run();
+  nimble_port_freertos_deinit();
+}
 
-        {
-          std::scoped_lock lock(beacon_items_mutex_);
+void BeaconReceiveTask::OnSyncStatic() {
+  if (instance_) {
+    instance_->OnSync();
+  }
+}
 
-          auto [it, inserted] = ble_beacon_items_.insert(item);
-          if (!inserted) {
-            ble_beacon_items_.erase(it);
-            ble_beacon_items_.insert(item);
-          }
+void BeaconReceiveTask::OnSync() {
+  ESP_LOGI(kTag, "NimBLE host synced, starting scan");
+
+  struct ble_gap_disc_params disc_params;
+  std::memset(&disc_params, 0, sizeof(disc_params));
+  disc_params.filter_duplicates = 0; // Receive all updates for accurate RSSI and expiry
+  disc_params.passive = 1;
+  disc_params.itvl = 0x00A0; // 160 * 0.625ms = 100ms
+  disc_params.window = 0x00A0; // 160 * 0.625ms = 100ms (continuous scan)
+
+  uint8_t own_addr_type;
+  int rc = ble_hs_id_infer_auto(0, &own_addr_type);
+  if (rc != 0) {
+    ESP_LOGE(kTag, "ble_hs_id_infer_auto failed: %d", rc);
+    return;
+  }
+
+  rc = ble_gap_disc(own_addr_type, BLE_HS_FOREVER, &disc_params, GapEventStatic, nullptr);
+  if (rc != 0) {
+    ESP_LOGE(kTag, "Scanning start failed, error %d", rc);
+  } else {
+    ESP_LOGI(kTag, "Scanning start successfully");
+  }
+}
+
+int BeaconReceiveTask::GapEventStatic(struct ble_gap_event* event, void* arg) {
+  if (instance_ != nullptr) {
+    return instance_->GapEvent(event, arg);
+  }
+  return 0;
+}
+
+int BeaconReceiveTask::GapEvent(struct ble_gap_event* event, void* arg) {
+  if (event->type == BLE_GAP_EVENT_DISC) {
+    if (IsIBeaconPacket(event->disc.data, event->disc.length_data)) {
+      const BleIBeacon* ibeacon_data =
+          reinterpret_cast<const BleIBeacon*>(event->disc.data);
+      const uint16_t major = EndianChangeU16(ibeacon_data->ibeacon_vendor.major);
+      const uint16_t minor = EndianChangeU16(ibeacon_data->ibeacon_vendor.minor);
+
+      if (std::memcmp(ibeacon_data->ibeacon_vendor.proximity_uuid,
+                      target_proximity_uuid_,
+                      sizeof(target_proximity_uuid_)) != 0 ||
+          major != target_major_id_) {
+        return 0;
+      }
+
+      BleBeaconItem item = {.minor = minor,
+                            .rssi = event->disc.rssi,
+                            .last_seen_ms = esp_timer_get_time() / 1000};
+
+      {
+        std::scoped_lock lock(beacon_items_mutex_);
+
+        auto [it, inserted] = ble_beacon_items_.insert(item);
+        if (!inserted) {
+          ble_beacon_items_.erase(it);
+          ble_beacon_items_.insert(item);
         }
       }
     }
-  } else if (event == ESP_GAP_BLE_SCAN_STOP_COMPLETE_EVT) {
-    esp_err_t err = param->scan_stop_cmpl.status;
-    if (err != ESP_BT_STATUS_SUCCESS) {
-      ESP_LOGE(kTag, "Scanning stop failed, error %s", esp_err_to_name(err));
-    } else {
-      ESP_LOGI(kTag, "Scanning stop successfully");
-    }
   }
+  return 0;
 }
 
 bool BeaconReceiveTask::IsIBeaconPacket(const uint8_t* adv_data,
                                         const uint8_t adv_data_len) const {
   if (adv_data != nullptr && adv_data_len == 0x1e) {
-    if (!memcmp(adv_data, reinterpret_cast<const uint8_t*>(&kIBeaconHeader),
-                sizeof(kIBeaconHeader))) {
+    if (!std::memcmp(adv_data, reinterpret_cast<const uint8_t*>(&kIBeaconHeader),
+                     sizeof(kIBeaconHeader))) {
       return true;
     }
   }
   return false;
-}
-
-void BeaconReceiveTask::EventGapStatic(esp_gap_ble_cb_event_t event,
-                                       esp_ble_gap_cb_param_t* param) {
-  // Since esp_ble_gap_cb_param_t does not have UserData, pass it to instance_.
-  if (instance_ != nullptr) {
-    instance_->EventGap(event, param);
-  }
 }
 
 }  // namespace bfox_receiver_system

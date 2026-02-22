@@ -3,6 +3,7 @@
 // ESP32 B-Fox Receiver
 // (C)2025 bekki.jp
 
+#include <cstdint>
 #include <cstring>
 
 namespace bfox_receiver_system {

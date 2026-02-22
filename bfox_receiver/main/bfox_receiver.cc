@@ -9,7 +9,6 @@
 #include "driver/rtc_io.h"
 #include "esp_adc/adc_cali.h"
 #include "esp_adc/adc_cali_scheme.h"
-#include "esp_gap_ble_api.h"
 #include "esp_sleep.h"
 #include "esp_system.h"
 #include "esp_timer.h"
@@ -57,7 +56,7 @@ static const uint8_t kTargetProximityUuid[16] = {
     0x54, 0xD9, 0xE2, 0xF2, 0x11, 0x88  // 54D9E2F21188
 };
 
-constexpr int64_t kSleepTimeoutMs = 15000;  // Enter Deep Sleep after 15s of inactivity
+constexpr int64_t kSleepTimeoutMs = 30000;  // Enter Deep Sleep after 30s of inactivity
 constexpr i2c_port_t kI2cPortNo = I2C_NUM_0;
 constexpr int kLcdDisplayLines = 2;
 
