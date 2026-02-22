@@ -24,7 +24,7 @@ BeaconSetting::BeaconSetting()
       minor_(0),
       measured_power_(-59),
       tx_power_(TxPower::kHigh),
-      adv_interval_ms_(200) {}
+      adv_interval_ms_(500) {}
 
 bool BeaconSetting::Save() {
   nvs_handle_t handle;
@@ -101,8 +101,8 @@ bool BeaconSetting::Load() {
 
   // adv_interval_ms is optional (backward compat: default 100ms if missing)
   if (nvs_get_u16(handle, kKeyAdvIntervalMs, &adv_interval_ms) != ESP_OK) {
-    ESP_LOGW(TAG, "adv_interval_ms not found in NVS, using default 200ms");
-    adv_interval_ms = 200;
+    ESP_LOGW(TAG, "adv_interval_ms not found in NVS, using default 500ms");
+    adv_interval_ms = 500;
   }
 
   nvs_close(handle);

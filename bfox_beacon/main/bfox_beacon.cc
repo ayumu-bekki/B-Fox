@@ -129,7 +129,8 @@ void BFoxBeacon::CreateBLEService() {
 
   // Start Bluetooth Low Energy (NimBLE)
   BleDevice* const ble_device = BleDevice::GetInstance();
-  ble_device->Initialize(setting_->GetDeviceName(), ibeacon_adv_data);
+  ble_device->Initialize(setting_->GetDeviceName(), ibeacon_adv_data,
+                         setting_->GetAdvIntervalMs());
   ble_device->RegisterServices(g_ble_bfox_service_ptr->GetServiceDefs());
   
   // Set TX power (controller-level API, works with NimBLE)

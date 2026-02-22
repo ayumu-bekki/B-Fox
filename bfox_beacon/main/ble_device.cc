@@ -27,12 +27,14 @@ BleDevice* BleDevice::GetInstance() {
   return this_;
 }
 
-BleDevice::BleDevice() : adv_interval_ms_(200) {}
+BleDevice::BleDevice() : adv_interval_ms_(500) {}
 
 void BleDevice::Initialize(const std::string& device_name,
-                           BleIBeacon& ibeacon_adv_data) {
+                           BleIBeacon& ibeacon_adv_data,
+                           uint16_t interval_ms) {
   device_name_ = device_name;
   ibeacon_adv_data_ = ibeacon_adv_data;
+  adv_interval_ms_ = interval_ms;
 
   // Initialize NimBLE port
   int rc = nimble_port_init();

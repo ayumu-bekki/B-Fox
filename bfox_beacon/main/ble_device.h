@@ -23,7 +23,8 @@ class BleDevice final {
 
  public:
   // Initialize NimBLE stack and setup device name/iBeacon data
-  void Initialize(const std::string& device_name, BleIBeacon& ibeacon_adv_data);
+  void Initialize(const std::string& device_name, BleIBeacon& ibeacon_adv_data,
+                  uint16_t interval_ms);
 
   // Register NimBLE GATT services before starting the host
   void RegisterServices(const struct ble_gatt_svc_def* svcs);
