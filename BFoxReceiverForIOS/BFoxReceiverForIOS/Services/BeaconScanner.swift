@@ -22,6 +22,7 @@ final class BeaconScanner: NSObject, ObservableObject {
     private var currentUUID: UUID = Constants.beaconUUID
     private let beaconTimeoutInterval: TimeInterval = 2.0
     private var timeoutTimer: Timer?
+    private var simulatorTimer: Timer?
 
     // MARK: - Init
 
@@ -29,6 +30,10 @@ final class BeaconScanner: NSObject, ObservableObject {
         super.init()
         locationManager.delegate = self
         locationManager.allowsBackgroundLocationUpdates = false
+        
+        #if targetEnvironment(simulator)
+        startSimulatorMock()
+        #endif
     }
 
     // MARK: - Public API
@@ -36,6 +41,11 @@ final class BeaconScanner: NSObject, ObservableObject {
     func startScanning(major: Int, uuid: UUID = Constants.beaconUUID) {
         currentMajor = major
         currentUUID = uuid
+
+        #if targetEnvironment(simulator)
+        isScanning = true
+        return
+        #endif
 
         switch locationManager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
@@ -48,6 +58,10 @@ final class BeaconScanner: NSObject, ObservableObject {
     }
 
     func stopScanning() {
+        #if targetEnvironment(simulator)
+        isScanning = false
+        return
+        #endif
         stopRanging()
     }
 
@@ -55,6 +69,12 @@ final class BeaconScanner: NSObject, ObservableObject {
         let wasScanning = isScanning
         if wasScanning { stopRanging() }
         currentMajor = major
+        
+        #if targetEnvironment(simulator)
+        if wasScanning { isScanning = true }
+        return
+        #endif
+        
         if wasScanning { beginRanging() }
     }
 
@@ -64,10 +84,61 @@ final class BeaconScanner: NSObject, ObservableObject {
         currentUUID = uuid
         currentMajor = major
         beacons = []
+        
+        #if targetEnvironment(simulator)
+        if wasScanning { isScanning = true }
+        return
+        #endif
+        
         if wasScanning { beginRanging() }
     }
 
     // MARK: - Private Helpers
+
+    private func startSimulatorMock() {
+        simulatorTimer?.invalidate()
+        simulatorTimer = Timer.scheduledTimer(withTimeInterval: 1.2, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                guard let self = self, self.isScanning else { return }
+                self.updateSimulatorBeacons()
+            }
+        }
+    }
+
+    private func updateSimulatorBeacons() {
+        let now = Date()
+        // 「1番」と「3番」のマイナーIDを持つダミーデータを作成
+        let mockData: [(id: Int, rssi: Int)] = [
+            (1, -55), // 比較的近い
+            (3, -78)  // 少し遠い
+        ]
+        
+        var updated = self.beacons
+
+        for data in mockData {
+            let proximity: CLProximity = {
+                if data.rssi > -60 { return .immediate }
+                if data.rssi > -80 { return .near }
+                return .far
+            }()
+
+            if let idx = updated.firstIndex(where: { $0.id == data.id }) {
+                updated[idx].rssi = data.rssi + Int.random(in: -2...2) // 少し変動させる
+                updated[idx].proximity = proximity
+                updated[idx].lastSeen = now
+            } else {
+                updated.append(DetectedBeacon(
+                    id: data.id,
+                    minor: data.id,
+                    rssi: data.rssi,
+                    proximity: proximity,
+                    lastSeen: now
+                ))
+            }
+        }
+
+        self.beacons = updated.sorted { $0.rssi > $1.rssi }
+    }
 
     private func beginRanging() {
         let constraint = CLBeaconIdentityConstraint(
