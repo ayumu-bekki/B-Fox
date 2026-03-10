@@ -254,9 +254,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Bluetooth is used to detect nearby iBeacons.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "The camera is used to scan B-Fox QR codes.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location services are required to discover and determine distance to iBeacons.";
@@ -290,9 +291,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Bluetooth is used to detect nearby iBeacons.";
 				INFOPLIST_KEY_NSCameraUsageDescription = "The camera is used to scan B-Fox QR codes.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location services are required to discover and determine distance to iBeacons.";
