@@ -23,7 +23,7 @@ BeaconSetting::BeaconSetting()
       major_(0),
       minor_(0),
       measured_power_(-59),
-      tx_power_(TxPower::kHigh),
+      tx_power_(TxPower::kP9),
       adv_interval_ms_(500) {}
 
 bool BeaconSetting::Save() {
@@ -87,7 +87,7 @@ bool BeaconSetting::Load() {
   uint16_t major = 0;
   uint16_t minor = 0;
   int32_t measured_power = -59;
-  int32_t tx_power = TxPower::kHigh;
+  int32_t tx_power = TxPower::kP9;
   uint16_t adv_interval_ms = 100;
 
   if (nvs_get_u16(handle, kKeyMajor, &major) != ESP_OK ||
@@ -154,10 +154,15 @@ esp_power_level_t BeaconSetting::GetEspTxPowerLevel() const {
   }
   constexpr esp_power_level_t kTxPowerToEspPowerLevelTable[kMaxTxPower] = {
       ESP_PWR_LVL_P9,   // kNone
-      ESP_PWR_LVL_P9,   // kHigh
-      ESP_PWR_LVL_P6,   // kMid
-      ESP_PWR_LVL_P3,   // kLow
-      ESP_PWR_LVL_N12,  // kSLow
+      ESP_PWR_LVL_P9,   // kP9
+      ESP_PWR_LVL_P6,   // kP6
+      ESP_PWR_LVL_P3,   // kP3
+      ESP_PWR_LVL_N0,   // kN0
+      ESP_PWR_LVL_N3,   // kN3
+      ESP_PWR_LVL_N6,   // kN6
+      ESP_PWR_LVL_N9,   // kN9
+      ESP_PWR_LVL_N12,  // kN12
+      ESP_PWR_LVL_N15,  // kN15
   };
   return kTxPowerToEspPowerLevelTable[tx_power_];
 }

@@ -15,11 +15,16 @@ namespace bfox_beacon_system {
 class BeaconSetting final {
  public:
   enum TxPower {
-    kNone = 0,  // None
-    kHigh,      // + 9dbm (8mW)    ESP_PWR_LVL_P9
-    kMid,       // + 6dbm (4mW)    ESP_PWR_LVL_P6
-    kLow,       // + 3dbm (2mW)    ESP_PWR_LVL_P3
-    kSLow,      // -12dBm (0.06mW) ESP_PWR_LVL_N12
+    kNone = 0,
+    kP9,   // +9dBm (7.9mW)
+    kP6,   // +6dBm (4.0mW)
+    kP3,   // +3dBm (2.0mW)
+    kN0,   //  0dBm (1.0mW)
+    kN3,   // -3dBm (0.50mW)
+    kN6,   // -6dBm (0.25mW)
+    kN9,   // -9dBm (0.13mW)
+    kN12,  //-12dBm (0.06mW)
+    kN15,  //-15dBm (0.03mW)
     kMaxTxPower,
   };
 
