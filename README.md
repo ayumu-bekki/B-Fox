@@ -5,6 +5,7 @@
 
 # B-Fox App Store (iOS)
 [![B-Fox Receiver for iOS](./docs/appstore.png)](https://apps.apple.com/jp/app/b-fox-receiver/id6759365457)
+
 https://apps.apple.com/jp/app/b-fox-receiver/id6759365457
 
 # B-Fox Beacon Control Panel
