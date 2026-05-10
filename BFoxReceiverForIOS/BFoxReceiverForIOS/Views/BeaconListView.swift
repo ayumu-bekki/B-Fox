@@ -62,8 +62,8 @@ private struct BeaconRowView: View {
                 .font(.system(size: 18, weight: .semibold, design: .monospaced))
                 .foregroundStyle(color)
 
-            // Proximity label
-            Text(proximityLabel(beacon.proximity))
+            // Signal level label
+            Text(signalLevelLabel(beacon))
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -96,13 +96,8 @@ private struct BeaconRowView: View {
 
     // MARK: - Helpers
 
-    private func proximityLabel(_ proximity: CLProximity) -> String {
-        switch proximity {
-        case .immediate: return String(localized: "proximity.immediate")
-        case .near:      return String(localized: "proximity.near")
-        case .far:       return String(localized: "proximity.far")
-        default:         return String(localized: "proximity.unknown")
-        }
+    private func signalLevelLabel(_ beacon: DetectedBeacon) -> String {
+        VoiceGuidanceService.SignalLevel.from(normalizedRSSI: beacon.normalizedRSSI).localizedName()
     }
 }
 

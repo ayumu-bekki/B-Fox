@@ -14,9 +14,12 @@ enum Constants {
     static let majorKey = "beacon_major"
     static let showRSSIKey = "show_rssi"
     static let uuidKey = "beacon_uuid"
+    static let voiceGuidanceEnabledKey = "voice_guidance_enabled"
+    static let voiceGuidanceIntervalKey = "voice_guidance_interval"
 
     // Default values
     static let defaultMajor = 0
+    static let defaultVoiceGuidanceInterval: Double = 5.0
     static let defaultBFoxProximityUUID = "C65B2C5D-9E53-46EC-8B8E-54D9E2F21188"
 
     // Radar display

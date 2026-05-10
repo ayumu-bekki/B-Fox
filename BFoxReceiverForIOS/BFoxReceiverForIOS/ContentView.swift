@@ -9,9 +9,12 @@ private enum Tab { case radar, qr, settings }
 struct ContentView: View {
 
     @StateObject private var scanner = BeaconScanner()
+    @State private var voiceGuidance = VoiceGuidanceService()
     @AppStorage(Constants.majorKey)    private var major: Int    = Constants.defaultMajor
     @AppStorage(Constants.uuidKey)     private var uuidString: String = Constants.defaultBFoxProximityUUID
     @AppStorage(Constants.showRSSIKey) private var showRSSI: Bool = false
+    @AppStorage(Constants.voiceGuidanceEnabledKey)  private var voiceGuidanceEnabled: Bool = false
+    @AppStorage(Constants.voiceGuidanceIntervalKey) private var voiceGuidanceInterval: Double = Constants.defaultVoiceGuidanceInterval
 
     @State private var selectedTab: Tab = .radar
     @State private var showQRScanner: Bool = false
@@ -48,9 +51,11 @@ struct ContentView: View {
         .onAppear {
             let uuid = UUID(uuidString: uuidString) ?? Constants.beaconUUID
             scanner.startScanning(major: major, uuid: uuid)
+            updateVoiceGuidance(enabled: voiceGuidanceEnabled, interval: voiceGuidanceInterval)
         }
         .onDisappear {
             scanner.stopScanning()
+            voiceGuidance.stop()
         }
         .onChange(of: major) { _, newValue in
             scanner.updateMajor(newValue)
@@ -58,6 +63,14 @@ struct ContentView: View {
         .onChange(of: uuidString) { _, newValue in
             guard let uuid = UUID(uuidString: newValue) else { return }
             scanner.updateBeaconTarget(uuid: uuid, major: major)
+        }
+        .onChange(of: voiceGuidanceEnabled) { _, enabled in
+            updateVoiceGuidance(enabled: enabled, interval: voiceGuidanceInterval)
+        }
+        .onChange(of: voiceGuidanceInterval) { _, newInterval in
+            if voiceGuidanceEnabled {
+                updateVoiceGuidance(enabled: true, interval: newInterval)
+            }
         }
         .sheet(isPresented: $showQRScanner) {
             QRScannerView { uuid, newMajor in
@@ -68,6 +81,16 @@ struct ContentView: View {
             } onDismiss: {
                 showQRScanner = false
             }
+        }
+    }
+
+    // MARK: - Voice Guidance
+
+    private func updateVoiceGuidance(enabled: Bool, interval: TimeInterval) {
+        if enabled {
+            voiceGuidance.start(beaconsProvider: { [scanner] in scanner.beacons }, interval: interval)
+        } else {
+            voiceGuidance.stop()
         }
     }
 

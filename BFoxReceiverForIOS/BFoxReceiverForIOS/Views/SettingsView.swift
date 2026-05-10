@@ -8,6 +8,8 @@ struct SettingsView: View {
     @AppStorage(Constants.majorKey)    private var major: Int    = Constants.defaultMajor
     @AppStorage(Constants.uuidKey)     private var uuidString: String = Constants.defaultBFoxProximityUUID
     @AppStorage(Constants.showRSSIKey) private var showRSSI: Bool = false
+    @AppStorage(Constants.voiceGuidanceEnabledKey)  private var voiceGuidanceEnabled: Bool = false
+    @AppStorage(Constants.voiceGuidanceIntervalKey) private var voiceGuidanceInterval: Double = Constants.defaultVoiceGuidanceInterval
 
     /// TextField の編集中バッファ。フォーカスが外れたときにバリデートして uuidString へ書き込む。
     @State private var uuidDraft: String = ""
@@ -102,6 +104,40 @@ struct SettingsView: View {
                     }
                 } header: {
                     Text(String(localized: "settings.section.display"))
+                }
+
+                // MARK: - Voice Guidance
+                Section {
+                    Toggle(isOn: $voiceGuidanceEnabled) {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(String(localized: "settings.voice.toggle"))
+                                Text(String(localized: "settings.voice.description"))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "speaker.wave.2")
+                                .foregroundStyle(Color.accentColor)
+                        }
+                    }
+
+                    if voiceGuidanceEnabled {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(String(localized: "settings.voice.interval"))
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            Picker(String(localized: "settings.voice.interval"), selection: $voiceGuidanceInterval) {
+                                Text(String(localized: "settings.voice.interval.3s")).tag(3.0)
+                                Text(String(localized: "settings.voice.interval.5s")).tag(5.0)
+                                Text(String(localized: "settings.voice.interval.10s")).tag(10.0)
+                            }
+                            .pickerStyle(.segmented)
+                        }
+                        .padding(.vertical, 4)
+                    }
+                } header: {
+                    Text(String(localized: "settings.section.voice"))
                 }
 
                 // MARK: - Info
