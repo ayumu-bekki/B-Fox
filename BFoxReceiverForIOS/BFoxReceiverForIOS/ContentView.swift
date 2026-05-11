@@ -10,11 +10,13 @@ struct ContentView: View {
 
     @StateObject private var scanner = BeaconScanner()
     @State private var voiceGuidance = VoiceGuidanceService()
+    @State private var hapticGuidance = HapticGuidanceService()
     @AppStorage(Constants.majorKey)    private var major: Int    = Constants.defaultMajor
     @AppStorage(Constants.uuidKey)     private var uuidString: String = Constants.defaultBFoxProximityUUID
     @AppStorage(Constants.showRSSIKey) private var showRSSI: Bool = false
     @AppStorage(Constants.voiceGuidanceEnabledKey)  private var voiceGuidanceEnabled: Bool = false
     @AppStorage(Constants.voiceGuidanceIntervalKey) private var voiceGuidanceInterval: Double = Constants.defaultVoiceGuidanceInterval
+    @AppStorage(Constants.hapticGuidanceEnabledKey) private var hapticGuidanceEnabled: Bool = false
 
     @State private var selectedTab: Tab = .radar
     @State private var showQRScanner: Bool = false
@@ -52,10 +54,12 @@ struct ContentView: View {
             let uuid = UUID(uuidString: uuidString) ?? Constants.beaconUUID
             scanner.startScanning(major: major, uuid: uuid)
             updateVoiceGuidance(enabled: voiceGuidanceEnabled, interval: voiceGuidanceInterval)
+            updateHapticGuidance(enabled: hapticGuidanceEnabled, interval: voiceGuidanceInterval)
         }
         .onDisappear {
             scanner.stopScanning()
             voiceGuidance.stop()
+            hapticGuidance.stop()
         }
         .onChange(of: major) { _, newValue in
             scanner.updateMajor(newValue)
@@ -67,9 +71,15 @@ struct ContentView: View {
         .onChange(of: voiceGuidanceEnabled) { _, enabled in
             updateVoiceGuidance(enabled: enabled, interval: voiceGuidanceInterval)
         }
+        .onChange(of: hapticGuidanceEnabled) { _, enabled in
+            updateHapticGuidance(enabled: enabled, interval: voiceGuidanceInterval)
+        }
         .onChange(of: voiceGuidanceInterval) { _, newInterval in
             if voiceGuidanceEnabled {
                 updateVoiceGuidance(enabled: true, interval: newInterval)
+            }
+            if hapticGuidanceEnabled {
+                updateHapticGuidance(enabled: true, interval: newInterval)
             }
         }
         .sheet(isPresented: $showQRScanner) {
@@ -91,6 +101,14 @@ struct ContentView: View {
             voiceGuidance.start(beaconsProvider: { [scanner] in scanner.beacons }, interval: interval)
         } else {
             voiceGuidance.stop()
+        }
+    }
+
+    private func updateHapticGuidance(enabled: Bool, interval: TimeInterval) {
+        if enabled {
+            hapticGuidance.start(beaconsProvider: { [scanner] in scanner.beacons }, interval: interval)
+        } else {
+            hapticGuidance.stop()
         }
     }
 

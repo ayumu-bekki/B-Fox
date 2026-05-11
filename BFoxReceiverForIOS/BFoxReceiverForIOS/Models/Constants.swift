@@ -16,6 +16,7 @@ enum Constants {
     static let uuidKey = "beacon_uuid"
     static let voiceGuidanceEnabledKey = "voice_guidance_enabled"
     static let voiceGuidanceIntervalKey = "voice_guidance_interval"
+    static let hapticGuidanceEnabledKey = "haptic_guidance_enabled"
 
     // Default values
     static let defaultMajor = 0

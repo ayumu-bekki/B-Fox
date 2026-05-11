@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage(Constants.showRSSIKey) private var showRSSI: Bool = false
     @AppStorage(Constants.voiceGuidanceEnabledKey)  private var voiceGuidanceEnabled: Bool = false
     @AppStorage(Constants.voiceGuidanceIntervalKey) private var voiceGuidanceInterval: Double = Constants.defaultVoiceGuidanceInterval
+    @AppStorage(Constants.hapticGuidanceEnabledKey) private var hapticGuidanceEnabled: Bool = false
 
     /// TextField の編集中バッファ。フォーカスが外れたときにバリデートして uuidString へ書き込む。
     @State private var uuidDraft: String = ""
@@ -106,7 +107,7 @@ struct SettingsView: View {
                     Text(String(localized: "settings.section.display"))
                 }
 
-                // MARK: - Voice Guidance
+                // MARK: - Guidance
                 Section {
                     Toggle(isOn: $voiceGuidanceEnabled) {
                         Label {
@@ -122,12 +123,26 @@ struct SettingsView: View {
                         }
                     }
 
-                    if voiceGuidanceEnabled {
+                    Toggle(isOn: $hapticGuidanceEnabled) {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(String(localized: "settings.haptic.toggle"))
+                                Text(String(localized: "settings.haptic.description"))
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "hand.tap")
+                                .foregroundStyle(Color.accentColor)
+                        }
+                    }
+
+                    if voiceGuidanceEnabled || hapticGuidanceEnabled {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(String(localized: "settings.voice.interval"))
+                            Text(String(localized: "settings.guidance.interval"))
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
-                            Picker(String(localized: "settings.voice.interval"), selection: $voiceGuidanceInterval) {
+                            Picker(String(localized: "settings.guidance.interval"), selection: $voiceGuidanceInterval) {
                                 Text(String(localized: "settings.voice.interval.3s")).tag(3.0)
                                 Text(String(localized: "settings.voice.interval.5s")).tag(5.0)
                                 Text(String(localized: "settings.voice.interval.10s")).tag(10.0)
@@ -137,7 +152,7 @@ struct SettingsView: View {
                         .padding(.vertical, 4)
                     }
                 } header: {
-                    Text(String(localized: "settings.section.voice"))
+                    Text(String(localized: "settings.section.guidance"))
                 }
 
                 // MARK: - Info

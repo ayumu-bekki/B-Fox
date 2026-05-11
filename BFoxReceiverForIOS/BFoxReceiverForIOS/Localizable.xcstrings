@@ -312,6 +312,54 @@
         }
       }
     },
+    "settings.guidance.interval" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guidance Interval"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "案内間隔"
+          }
+        }
+      }
+    },
+    "settings.haptic.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibrates beacon number with intensity matching signal strength."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ビーコン番号の回数を電波強度に応じた振動で伝えます"
+          }
+        }
+      }
+    },
+    "settings.haptic.toggle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haptic Feedback"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "触覚フィードバック"
+          }
+        }
+      }
+    },
     "settings.info.version" : {
       "localizations" : {
         "en" : {
@@ -424,6 +472,22 @@
         }
       }
     },
+    "settings.section.guidance" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessibility"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクセシビリティ"
+          }
+        }
+      }
+    },
     "settings.section.info" : {
       "localizations" : {
         "en" : {
@@ -441,6 +505,7 @@
       }
     },
     "settings.section.voice" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -537,6 +602,7 @@
       }
     },
     "settings.voice.interval" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
