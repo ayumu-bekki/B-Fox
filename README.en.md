@@ -31,6 +31,25 @@ Since the protocol uses iBeacon (BLE), you can play by installing apps like Ligh
 A dedicated receiver app for iOS is also available.
 ![B-Fox Receiver for iOS](./docs/ios_app.png)
 
+### Beacon Configuration via QR Code
+The iOS receiver app supports scanning QR codes to configure beacon targets (UUID + Major ID).
+
+**QR Code Format:**
+```
+BFOX:<UUID>:<MajorID>
+```
+
+| Element | Description | Constraints |
+|---------|-------------|-------------|
+| `BFOX` | Fixed prefix (case-insensitive) | Required |
+| `UUID` | iBeacon UUID | Standard UUID format |
+| `MajorID` | iBeacon Major ID | Integer 0–65535 |
+
+**Example:**
+```
+BFOX:C65B2C5D-9E53-46EC-8B8E-54D9E2F21188:100
+```
+
 ### Comparison
 
 |                           | ARDF                                                                   | B-Fox              |
