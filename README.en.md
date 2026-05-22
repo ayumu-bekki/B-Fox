@@ -77,3 +77,10 @@ Contains transmitter/receiver programs, mechanical design, and operation methods
   - Technical documentation, PCB, Case (for 3D printer)
 - operation
   - Operation guidelines and documentation
+
+## License
+
+This project is licensed under the **CERN-OHL-P v2** (CERN Open Hardware Licence Version 2 - Permissive). For more details, please see the [LICENSE](./LICENSE) file.
+
+Copyright (c) 2025 Ayumu Bekki
+

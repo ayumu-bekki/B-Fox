@@ -82,3 +82,10 @@ BFOX:C65B2C5D-9E53-46EC-8B8E-54D9E2F21188:100
   - 技術資料・PCB・ケース(3Dプリンタ用)
 - operation
   - 運用キット
+
+## ライセンス
+
+このプロジェクトは **CERN-OHL-P v2** (CERN Open Hardware Licence Version 2 - Permissive) の下で公開されています。詳細については、[LICENSE](./LICENSE) ファイルを参照してください。
+
+Copyright (c) 2025 Ayumu Bekki
+
